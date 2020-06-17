@@ -1,5 +1,8 @@
 import React, {Component} from 'react';
 import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
+import Sidebar from '../Sidebar'
+import MainHeader from '../Header/MainHeader'
+import SearchComponent from '../Header/SearchComponent'
 //import * as SecureStore from 'expo-secure-store';
 //import { connect } from 'react-redux'
 //import { AuthenticationActions, AudioActions, MyPlaylistActions, ThemeActions  } from '../store/actionCreator'
@@ -30,6 +33,8 @@ class MainPage extends Component {
         this.state = {
             isLoaded:false,
             //searchOpen:false,
+            searchNavigator:{open:()=>{this.handleOpenSearch()}, close:()=>{this.handleCloseSearch()}, status:false},
+            sidebarNavigator:{open:()=>{}, close:()=>{}, status:''},
             mainNavigator:{push:()=>{}, pop:()=>{}}
         }
     }
@@ -128,12 +133,6 @@ class MainPage extends Component {
     }
     */
     /*
-    handleSearch = (setting) =>{
-        this.setState((state)=>({
-            ...state,
-            searchOpen: setting
-        }))
-    }
     handleLogin = async (id, password)=>{
         try{
             const response = await networkHandler.account.Login(id, password)
@@ -156,17 +155,27 @@ class MainPage extends Component {
     
     handleMainPush = (name, config) => this.state.mainNavigator.push(name, config)
     handleMainPop = (name) => this.state.mainNavigator.pop(name)
-    
     registerNavigator = (navigator) =>
         navigator && typeof navigator === 'object' && typeof navigator.push === 'function' && typeof navigator.pop === 'function' ?
         this.handleChange('mainNavigator', {push:navigator.push, pop:navigator.pop})
             : console.warn('[Warning] Main Navigator handler is not registered')
     
+    handleOpenSidebar = () => this.state.sidebarNavigator.open()
+    handleCloseSidebar = () => this.state.sidebarNavigator.close()
+    registerSidebarNavigator = (navigator) =>
+        navigator && typeof navigator === 'object' && typeof navigator.open === 'function' && typeof navigator.close === 'function' ?
+        this.handleChange('sidebarNavigator', {open:navigator.open, close:navigator.close, status:'close'})
+            : console.warn('[Warning] Sidebar Navigator handler is not registered')
+
+    handleOpenSearch = () => this.handleChange('searchNavigator', {...this.state.searchNavigator, status:true})
+    handleCloseSearch = () => this.handleChange('searchNavigator', {...this.state.searchNavigator, status:false})
+    
     render(){
         //const {isLogin, token, username, showPlaybar} = this.props
         const {handleMainPush, handleMainPop, handleWholePush, handleWholePop} = this
         //const headerPos = 60+deviceCheck.getTopPadding()
-        const headerPos = 100
+        const padding = 40
+        const headerPos = 60 + padding
         //const musicList = getMusicList()
         return(
             <View style={styles.container}>
@@ -177,38 +186,26 @@ class MainPage extends Component {
                         <Route name="View2" component={View2}/>
                         <Route name="View3" component={View3}/>
                     </Navigator>
-
                     {/*
                         <Route name="MainContainer" component={MainContainer} />
                         <Route name="MyPlaylistPage" component={MyPlaylistPage} />
                         <Route name="AlbumContainer" component={AlbumContainer} />*/}
                     {/*<View style={showPlaybar? styles.bottomPadding:styles.hideBottomPadding} />*/}
                 </View>
-                <View style={[styles.header,{height:headerPos, flexDirection:'row'}]}>
-                    <TouchableOpacity style={{flex:1, justifyContent:"center", backgroundColor:'gray'}}
-                        onPress={()=>this.handleMainPop()}>
-                        <Text>Main POP</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity style={{flex:1, justifyContent:"center", backgroundColor:'gray'}}
-                        onPress={()=>this.handleWholePop()}>
-                        <Text>Whole POP</Text>
-                    </TouchableOpacity>
-                    {/*
-                    <View style={{borderColor:'#fff',borderWidth:1,height:deviceCheck.getTopPadding()}} />
+                <View style={[styles.header,{height:headerPos}]}>  
+                    <View style={{borderColor:'#fff',borderWidth:1,height:padding}} />
                     
-                    <HeaderContainer
-                        handleSidebar={this.props.handler.open}
-                        handlePop={handleMainPop}
-                        handleSearch={handleSearch}
-                    />
-                    */}
+                    <MainHeader
+                        handleSearch={this.handleOpenSearch}
+                        handleSidebar={this.handleOpenSidebar}
+                        handlePop={handleMainPop} />
+                    
                 </View>
-
+                {this.state.searchNavigator.status ? (<SearchComponent navigator={this.state.searchNavigator} headerPos={headerPos}/>) : null}
+                
                 {/*
                 
                 <PlayingPage headerPos={headerPos} />
-                <SearchContainer handler={handleSearch} searchOpen={this.state.searchOpen} headerPos={headerPos}/>
                 
                 <SidebarPage
                     isLogin={isLogin}
@@ -220,6 +217,12 @@ class MainPage extends Component {
                     handleWholePush={handleWholePush}
                     musicList={musicList} />
                 */}
+                <Sidebar
+                    auth={this.props.auth}
+                    register={this.registerSidebarNavigator}
+                    handleMainPush={handleMainPush}
+                    handleWholePush={handleWholePush}
+                />
 
             </View>
         )
@@ -253,6 +256,7 @@ class View2 extends Component{
                 <TouchableOpacity onPress={()=>this.props.navigator.pop('View2')}>
                     <Text>Pop</Text>
                 </TouchableOpacity>
+                <Text>{this.props.config.title}</Text>
             </View>
         )
     }

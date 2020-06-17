@@ -148,6 +148,7 @@ class Navigator extends Component {
                                 <CurrentScene
                                     navigator={{push:this.handlePush, pop:this.handlePop}}
                                     config={scene.config}
+                                    auth={this.props.auth}
                                 />
                             </Animated.View>
                         )

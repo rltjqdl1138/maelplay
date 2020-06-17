@@ -2,6 +2,8 @@
   "expo": {
     "name": "mael-play-test",
     "slug": "mael-play-test",
+    "facebookScheme": "fb1103718229998923",
+    "facebookAppId": "1103718229998923", 
     "platforms": [
       "ios",
       "android"
@@ -23,7 +25,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.mael.testmaelplay",
-      "buildNumber": "1.0.0"
+      "buildNumber": "1.0.1"
     }
   }
 }
