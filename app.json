@@ -4,8 +4,7 @@
     "slug": "mael-play-test",
     "platforms": [
       "ios",
-      "android",
-      "web"
+      "android"
     ],
     "version": "1.0.0",
     "orientation": "portrait",
@@ -22,7 +21,9 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.mael.testmaelplay",
+      "buildNumber": "1.0.0"
     }
   }
 }
