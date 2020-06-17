@@ -20,7 +20,9 @@ export default class RootContainer extends Component{
         try{
             const _result = await SecureStore.getItemAsync('authentication')
             const result = JSON.parse(_result)
-            this.handleChange('auth', {...result, isLogin:true})
+            !result || !result.name || !result.token || !result.platform ?
+                this.handleChange('auth', {isLogin:false, name:'', token:'', platform:''}) :
+                this.handleChange('auth', {...result, isLogin:true})
         }catch(e){
             this.handleChange('auth', {isLogin:false, name:'', token:'', platform:''})
         }
@@ -45,7 +47,6 @@ export default class RootContainer extends Component{
             <Navigator auth={{...this.state.auth, handleLogin:this.handleLogin, handleLogout:this.handleLogout}}>
                 <Route name="Mainpage" component={MainPage} />
                 <Route name="Loginpage" component={LoginPage} />
-                <Route name="null" component={View} />
             </Navigator>
         )
     }

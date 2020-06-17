@@ -1,5 +1,6 @@
-import {url} from './configuration'
-const URL = url
+import configuration from './configuration'
+const {URL} = configuration
+
 exports.getCheckID = async (id, platform)=>{
     if(!id || id === '') return {}
     const response = await fetch(URL+'/api/account/checkid?id='+id+'&platform='+(platform?platform:'original'))

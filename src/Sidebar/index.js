@@ -2,7 +2,8 @@ import React, {Component} from 'react'
 import {Text, View, StyleSheet, Animated, TouchableOpacity, Dimensions } from 'react-native'
 //import { connect } from 'react-redux'
 //import { SidebarActions } from '../store/actionCreator'
-//import LogoutSidebar from '../containers/LogoutSidebar'
+import {LogoutSidebar, LoginSidebar} from './SidebarComponent'
+import {LogoutSetting, LoginSetting} from './SettingComponent'
 //import LoginSidebar from '../containers/LoginSidebar'
 //import LoginSetting from '../containers/LoginSetting'
 //import LogoutSetting from '../containers/LogoutSetting'
@@ -12,24 +13,52 @@ const screenHeight = Dimensions.get('window').height
 const screenWidth = Dimensions.get('window').width
 
 class MainComponent extends Component{
-    handleClick=()=>{
-        this.props.handleWholePush('Loginpage')
+    handleWholePush=(page)=>{
+        this.props.handleWholePush(page)
         this.props.handleClose()
     }
-    handleClick2=()=>{
-        this.props.auth.handleLogout()
+    handleMainPush=(page)=>{
+        this.props.handleMainPush(page)
         this.props.handleClose()
+    }
+    getComponent=()=>{
+        const {auth, settingHandler, handleClose} = this.props
+        const type = (auth.isLogin ? 2:0) + (settingHandler.status ? 1:0)
+        switch(type){
+            // Login
+            case 3:
+                return (<LoginSetting auth={auth}
+                        settingHandler={settingHandler}
+                        handleWholePush={this.handleWholePush}
+                        handleMainPush={this.handleMainPush}
+                        handleClose={handleClose}
+                    />)
+            case 2:
+                return (<LoginSidebar auth={auth}
+                        settingHandler={settingHandler}
+                        handleWholePush={this.handleWholePush}
+                        handleMainPush={this.handleMainPush}
+                    />)
+
+            // Logout
+            case 1:
+                return (<LogoutSetting auth={auth}
+                        settingHandler={settingHandler}
+                        handleWholePush={this.handleWholePush}
+                        handleMainPush={this.handleMainPush}
+                    />)
+            default:
+                return (<LogoutSidebar auth={auth}
+                        settingHandler={settingHandler}
+                        handleWholePush={this.handleWholePush}
+                        handleMainPush={this.handleMainPush}
+                    />)
+        }
     }
     render(){
-        const { handleMainPush, handleWholePush, handleClose } = this.props
         return (
             <View style={{flex:1, justifyContent:'center', alignItems:'center'}}>
-                <TouchableOpacity onPress={this.handleClick}>
-                    <Text>PUSH</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={this.handleClick2}>
-                    <Text>{this.props.auth.name+' 로그아웃'}</Text>
-                </TouchableOpacity>
+                {this.getComponent()}
             </View>
         )
         
@@ -66,7 +95,9 @@ export default class SidebarPage extends Component{
             duration:200,
             useNativeDriver:true
         }).start(()=> this.setState({ isOpenSetting:false, opa:'0%' }))
-    
+
+    openSetting=()=>this.handleChange('isOpenSetting',true)
+    closeSetting=()=>this.handleChange('isOpenSetting',false)
 
     render(){
         const {isOpenSetting, opa} = this.state
@@ -75,7 +106,9 @@ export default class SidebarPage extends Component{
                 <Animated.View style={this.getStyle()} >
                     <View style={{backgroundColor:'#000', width :opa, height:'100%', position:'absolute', opacity:0.7}} />
                     <View style={styles.main}>
+                        <View style={{height:40}}/>
                         <MainComponent
+                            settingHandler={{open:this.openSetting, close:this.closeSetting, status:isOpenSetting}}
                             handleMainPush={handleMainPush}
                             handleWholePush={handleWholePush}
                             handleClose={this.handleClose}
