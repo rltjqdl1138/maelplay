@@ -1,8 +1,14 @@
+// Expo modules
 import React, {Component} from 'react';
 import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
+import { Audio } from 'expo-av'
+
 import Sidebar from '../Sidebar'
 import MainHeader from '../Header/MainHeader'
 import SearchComponent from '../Header/SearchComponent'
+import ThemeContainer from '../Containers/ThemeContainer'
+import AlbumContainer from '../Containers/AlbumContainer'
+import {url} from '../NetworkHandler'
 //import * as SecureStore from 'expo-secure-store';
 //import { connect } from 'react-redux'
 //import { AuthenticationActions, AudioActions, MyPlaylistActions, ThemeActions  } from '../store/actionCreator'
@@ -16,15 +22,13 @@ import deviceCheck from '../deviceCheck'
 import PlayingPage from './PlayingPage'
 import MyPlaylistPage from './MyPlaylistPage'
 import SidebarPage from './SidebarPage'
-import {Audio} from 'expo-av'
 
-import networkHandler from '../networkHandler'
 */
 import {Route, Navigator} from '../Navigator'
 
-const SHUFFLE = 0
-const REPEAT = 1
-const SEQUENTE = 2
+const SEQUENTE = 0
+const SHUFFLE = 1
+const REPEAT = 2
 
 
 class MainPage extends Component {
@@ -32,7 +36,7 @@ class MainPage extends Component {
         super(props)
         this.state = {
             isLoaded:false,
-            //searchOpen:false,
+            musicInfo:{soundObject:null, isLoaded:false, isPlaying:false, playlist:[], playingAlbum:{}, playOption:SEQUENTE, playingIndex:-1, playingAlbumID:-1},
             searchNavigator:{open:()=>{this.handleOpenSearch()}, close:()=>{this.handleCloseSearch()}, status:false},
             sidebarNavigator:{open:()=>{}, close:()=>{}, status:''},
             mainNavigator:{push:()=>{}, pop:()=>{}}
@@ -40,16 +44,17 @@ class MainPage extends Component {
     }
     componentDidMount(){
         //this.loadMyPlaylist()
-        //this.loadAuthentication()
-        //this.loadThemeList()
-        //this.loadSoundObject()
+        this.createSoundObject()
         this.handleChange('isLoaded', true)
+    }
+    componentWillUnmount(){
+        const {isPlaying} = this.state.musicInfo
+        isPlaying ? this.PauseSound() : null
     }
 
     handleChange = (field, text) => this.setState({ [field]: text });
     
-    /*
-    loadSoundObject = async()=>{
+    createSoundObject = async()=>{
         try{
             await Audio.setAudioModeAsync({
                 playsInSilentModeIOS:true,
@@ -57,13 +62,56 @@ class MainPage extends Component {
                 interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX
             })
             const soundObject = new Audio.Sound()
-            await soundObject.setOnPlaybackStatusUpdate(this.onPlaybackStatusUpdate)
-            await AudioActions.initialize({soundObject})
+            this.handleChange('musicInfo', {soundObject, isLoaded:true, isPlaying:false, playlist:[], playOption:0, playingIndex:-1, playingAlbumID:-1})
         }catch(e){
             console.warn(e)
+            this.handleChange('musicInfo', {soundObject:null, isLoaded:false, isPlaying:false, playlist:[], playOption:0, playingIndex:-1, playingAlbumID:-1})
         }
     }
+
+    LoadSound = async(_index)=>{
+        const {soundObject, isPlaying, playlist} = this.state.musicInfo
+        let index = _index < 0 ? playlist.length - 1 : _index
+        index = index < playlist.length ? index : index - playlist.length
+        try{
+            isPlaying ? await soundObject.pauseAsync() : null
+            await soundObject.unloadAsync()
+            await soundObject.loadAsync({uri:url+'/music/'+playlist[index].uri})
+            await soundObject.playAsync()
+            this.handleChange('musicInfo',{...this.state.musicInfo, isPlaying:true, playingIndex:index})
+        }catch(e){
+            console.warn(e)
+            this.handleChange('musicInfo',{...this.state.musicInfo, isPlaying:false, playingIndex:index})
+        }
+    }
+    UpdateSoundList = async(list, album)=>{
+        return this.handleChange('musicInfo',{...this.state.musicInfo, playingAlbumID:album.ID, playlist:list, playingAlbum:album})
+    }
+    PauseSound = async()=>{
+        await this.state.musicInfo.soundObject.pauseAsync()
+        this.handleChange('musicInfo',{...this.state.musicInfo, isPlaying:false})
+    }
+    ResumeSound = async()=>{
+        await this.state.musicInfo.soundObject.playAsync()
+        this.handleChange('musicInfo',{...this.state.musicInfo, isPlaying:true})
+    }
+    NextSound = async(_index)=>{
+        const {playingIndex, playOption} = this.state.musicInfo
+        let nextIndex;
+        switch(playOption){
+            case SEQUENTE:
+                nextIndex = playingIndex + 1; break
+            case SHUFFLE:
+                //TODO: random
+                nextIndex = playingIndex + 1; break;
+            case REPEAT:
+                nextIndex = nextIndex = playingIndex; break;
+        }
+        const index = _index === undefined ? nextIndex : _index
+        await this.LoadSound(index)
+    }
     
+    /*
     onPlaybackStatusUpdate = playbackStatus =>{
         if (!playbackStatus.isLoaded) {
             if (playbackStatus.error) {
@@ -99,28 +147,6 @@ class MainPage extends Component {
     }*/
 
     /*
-    loadAuthentication = async() =>{
-        try{
-            //const _result = await SecureStore.getItemAsync('token')
-            //const result = JSON.parse(_result)
-            //if(!result || !result.token) return;
-
-            //const data = await networkHandler.account.checkToken(result.token)
-            //return data && data.success ? AuthenticationActions.initialize(result) : null
-        }catch(e){
-            //console.warn(e)
-            //return;
-        }
-    }*/
-
-    /*
-    loadThemeList = async() =>{
-        const data = await networkHandler.music.getMainThemeList()
-        if(data && data.success && data.result){
-            const {result} = data
-            ThemeActions.update(result)
-        }
-    }
 
     getMusicList = () =>{
         const {themeList} = this.props
@@ -132,24 +158,6 @@ class MainPage extends Component {
         return list
     }
     */
-    /*
-    handleLogin = async (id, password)=>{
-        try{
-            const response = await networkHandler.account.Login(id, password)
-            const {success, data} = response
-            if(success && data)
-                await AuthenticationActions.login({token:data.token, username:data.name, platform:data.platform})
-            console.warn(response)
-            return true
-        }catch(e){
-            console.warn(e)
-            return false
-        }
-    }
-    handleLogout = ()=>{
-        AuthenticationActions.logout()
-    }
-*/
     handleWholePush = (name, config) => this.props.navigator.push(name,config)
     handleWholePop = (name) => this.props.navigator.pop(name)
     
@@ -172,25 +180,27 @@ class MainPage extends Component {
     
     render(){
         //const {isLogin, token, username, showPlaybar} = this.props
+        const {LoadSound, NextSound, ResumeSound, PauseSound, UpdateSoundList} = this
         const {handleMainPush, handleMainPop, handleWholePush, handleWholePop} = this
         //const headerPos = 60+deviceCheck.getTopPadding()
         const padding = 40
         const headerPos = 60 + padding
         //const musicList = getMusicList()
+        const musicHandler = { info:this.state.musicInfo, load:LoadSound, next:NextSound, resume:ResumeSound, pause:PauseSound, update:UpdateSoundList }
         return(
             <View style={styles.container}>
                 <View style={[styles.mainscreenContainer,{top:headerPos}]}>
 
-                    <Navigator register={this.registerNavigator}>
-                        <Route name="View1" component={View1}/>
-                        <Route name="View2" component={View2}/>
-                        <Route name="View3" component={View3}/>
+                    <Navigator register={this.registerNavigator} handler={{Music:musicHandler}}>
+                        <Route name="Themecontainer" component={ThemeContainer} />
+                        <Route name="Albumcontainer" component={AlbumContainer} />
                     </Navigator>
+                    <View style={styles.hideBottomPadding} />
                     {/*
                         <Route name="MainContainer" component={MainContainer} />
                         <Route name="MyPlaylistPage" component={MyPlaylistPage} />
                         <Route name="AlbumContainer" component={AlbumContainer} />*/}
-                    {/*<View style={showPlaybar? styles.bottomPadding:styles.hideBottomPadding} />*/}
+                    {/**/}
                 </View>
                 <View style={[styles.header,{height:headerPos}]}>  
                     <View style={{borderColor:'#fff',borderWidth:1,height:padding}} />
@@ -207,15 +217,6 @@ class MainPage extends Component {
                 
                 <PlayingPage headerPos={headerPos} />
                 
-                <SidebarPage
-                    isLogin={isLogin}
-                    handleLogin ={this.handleLogin}
-                    handleLogout={this.handleLogout}
-                    username={username}
-                    token={token}
-                    handleMainPush={handleMainPush}
-                    handleWholePush={handleWholePush}
-                    musicList={musicList} />
                 */}
                 <Sidebar
                     auth={this.props.auth}
@@ -303,11 +304,11 @@ const styles = StyleSheet.create({
     bottomPadding:{
         height:deviceCheck.ifTopbarless?215:180,
         width:'100%',
-    },
-    hideBottomPadding:{
-        height:deviceCheck.ifTopbarless?100:20,
-        width:'100%',
     },*/
+    hideBottomPadding:{
+        height:100,
+        width:'100%',
+    },
 
 });
 /*

@@ -149,6 +149,7 @@ class Navigator extends Component {
                                     navigator={{push:this.handlePush, pop:this.handlePop}}
                                     config={scene.config}
                                     auth={this.props.auth}
+                                    handler={this.props.handler}
                                 />
                             </Animated.View>
                         )
