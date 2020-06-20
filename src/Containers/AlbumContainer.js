@@ -56,7 +56,7 @@ export default class AlbumContainer extends Component {
         (async()=>{
             const {musicPlaylist, albumInfo} = this.state
             const {info, load, next, resume, pause, update} = this.props.handler.Music
-
+           
             if(info.playingAlbumID === this.props.config.albumID && index === info.playingIndex)
                 return info.isPlaying ? await pause() : await resume()
             
@@ -120,15 +120,12 @@ export default class AlbumContainer extends Component {
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity style={[styles.playButtonContainer,{opacity:isDisabled?0.5:1}]}
                             disabled={isDisabled}
-                            onPress={()=>{
-                                AudioActions.update({albumID, index:1, list:musicPlaylist, info:albumInfo}) }}>
+                            onPress={()=>this.handleClick(0)}>
                             <Image source={require('../../assets/icons/playbutton.png')}
                                 style={styles.playButton}/>
                         </TouchableOpacity>
                         <TouchableOpacity style={styles.shffleButtonContainer}
-                            onPress={()=>{
-                                AudioActions.pause() }}
-                            >
+                            onPress={()=>this.handleClick()}>
                             <Image source={require('../../assets/icons/shufflebutton.png')}
                                 style={styles.shffleButton}/>
                         </TouchableOpacity>
@@ -142,27 +139,6 @@ export default class AlbumContainer extends Component {
         )
     }
 }
-/*
-
-                    <MusicPlayList
-                        isLogin={isLogin}
-                        musiclist={musicPlaylist}
-                        albumInfo={albumInfo}
-                        playingAlbumID={playingAlbumID}
-                        index={index+1}
-                        totalHeight={totalHeight}
-                        handleOpenLyric={handleOpenLyric}
-                        handleCloseLyric={handleCloseLyric}
-                        handleNext={AudioActions.next}
-                        handleResume={AudioActions.resume}
-                        handlePause={AudioActions.pause}
-                        handleUpdate={AudioActions.update}
-                        isPlaying={isPlaying}
-
-                        isLoaded={isLoaded}
-                    />
-*/
-
 
 const styles = StyleSheet.create({
     container:{
@@ -258,62 +234,6 @@ const styles = StyleSheet.create({
         fontWeight:'normal',
         color:'#121111',
         //color:'#767171'
-    }
-})
-
-/*
-class MusicPlayList extends Component{
-    render(){
-        const { isPlaying, musiclist, handleOpenLyric, handleCloseLyric, totalHeight, isLogin, albumInfo, playingAlbumID, isLoaded } = this.props
-        const {handleUpdate, handlePause, handleResume, handleNext} = this.props
-        const nowIndex = this.props.index
-        const musicItems = !musiclist ?
-            (<Text> Blank </Text>):
-            musiclist.map( (item, index)=> {
-                const {ID, title, info, lyricHeight, lyricLine} = item
-                return (
-                    <MusicItem
-                        isLoaded={isLoaded}
-                        musiclist={musiclist}
-                        key={ID}
-                        isLogin={isLogin}
-                        index={index+1}
-                        title={title}
-                        info={info}
-                        nowIndex={nowIndex}
-                        lyricLine={lyricLine?lyricLine:10}
-                        lyricHeight={lyricHeight}
-                        handleOpenLyric={handleOpenLyric}
-                        handleCloseLyric={handleCloseLyric}
-                        handleUpdate={handleUpdate}
-                        handleNext={handleNext}
-                        handlePause={handlePause}
-                        handleResume={handleResume}
-                        albumInfo={albumInfo}
-                        playingAlbumID={playingAlbumID}
-                        isPlaying={isPlaying}
-                        isCurrent={index === this.props.index && albumInfo.ID === playingAlbumID} />
-                    )
-            })
-        
-        const emptySet = ()=>{
-            return (
-                <Text style={{textAlign:'center', paddingTop:20, fontSize:20}}>
-                    곡이 아직 없는 앨범입니다!
-                </Text>)
-        }
-        return(
-            <View style={[containerStyle.container], {height:totalHeight}}>
-                { musiclist.length === 0? emptySet():musicItems }
-            </View>
-        )
-    }
-}*/
-const containerStyle = StyleSheet.create({
-    container:{
-        flex:1,
-        width:'100%',
-        backgroundColor:'#fff'
     }
 })
 

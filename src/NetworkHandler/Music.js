@@ -1,6 +1,26 @@
 import configuration from './configuration'
 const {URL} = configuration
 
+import * as FileSystem from 'expo-file-system'
+
+
+exports.getMusicFromCache = async(uri) =>{
+    const fileUri = FileSystem.cacheDirectory + uri +'.mp3'
+    //const CacheTable = await _getCacheTable()
+    const file = await FileSystem.getInfoAsync(fileUri)
+    if(file && file.exists){
+        //if(!CacheTable[uri])
+        //    _appendNewItem({uri, fileUri})
+        return {uri:file.uri,status:'old'}
+    }
+    const remoteUri = URL + '/music/' + uri
+    const downloadFile = await FileSystem.downloadAsync(remoteUri, fileUri)
+    if(downloadFile.status === 200 || downloadFile.status === 201){
+    //    _appendNewItem({uri, fileUri})
+        return {uri:downloadFile.uri, status:'new'}
+    }
+    return {status:'fail', uri:remoteUri}
+}
 exports.getMainThemeList = async () =>{
     try{
         //TODO: patch the URL
