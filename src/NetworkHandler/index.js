@@ -1,6 +1,7 @@
-import * as Account from './Account'
-import * as Music from './Music'
-import * as Config from './configuration'
+import Account from './Account'
+import Music from './Music'
+import Config from './configuration'
+
 exports.url = Config.URL
 exports.Account = Account
 exports.Music = Music

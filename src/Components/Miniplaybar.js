@@ -21,7 +21,6 @@ export default class MiniPlayingbar extends Component{
                         source={require('../../assets/icons/play.png')} />
             </TouchableOpacity>)
     }
-    //    <PlayingBar isPlaying={isPlaying} theme='gray'/>
     render(){
         const {PlayButton} = this
         const {minibarSize, musicHandler} = this.props

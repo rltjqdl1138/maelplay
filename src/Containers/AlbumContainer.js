@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import { View, TouchableOpacity, StyleSheet, Text, Image, ScrollView, Dimensions } from 'react-native'
 import {Music} from '../NetworkHandler'
+import {AlbumItem, MyplaylistItem} from '../Components/MusicInfoItem'
 //import networkHandler from '../networkHandler'
 //import CacheManager from '../CacheManager'
 //import {AudioActions, MyPlaylistActions} from '../store/actionCreator'
@@ -36,7 +37,16 @@ export default class AlbumContainer extends Component {
     }
     componentDidMount(){
         const {albumID} = this.props.config;
-        this.props.handler.Music ?
+        if(!this.props.handler.Music)
+            return navigator.pop()
+        return albumID === 0 ?
+            // * LOAD MY PLAYLIST *
+            this.setState(state=>({
+                isLoaded:true,
+                albumInfo: {ID:0, title:'My Playlist'},
+                musicPlaylist: []
+            })) :
+            // * LOAD ALBUM FROM SERVER *
             (async()=>{
                 const data1 = await Music.getAlbum(albumID)
                 const data2 = await Music.getMusicList(albumID)
@@ -49,13 +59,13 @@ export default class AlbumContainer extends Component {
                         albumInfo: data1.data[0],
                         musicPlaylist: data2.data }))
                     }
-            })() : navigator.pop()
+            })()
 
     }
     handleClick = (index)=>{
         (async()=>{
             const {musicPlaylist, albumInfo} = this.state
-            const {info, load, next, resume, pause, update} = this.props.handler.Music
+            const {info, load, resume, pause, update} = this.props.handler.Music
            
             if(info.playingAlbumID === this.props.config.albumID && index === info.playingIndex)
                 return info.isPlaying ? await pause() : await resume()
@@ -103,15 +113,23 @@ export default class AlbumContainer extends Component {
         //const { title, isLogin, index, albumID, playingAlbumID, isPlaying, isLoaded } = this.props
         //const isDisabled = playingAlbumID === albumID
         const isDisabled = info.playingAlbumID === albumInfo.ID
-        const list = musicPlaylist.map((item,index)=>(
-            <MusicItem key={index}
+        const list = musicPlaylist.map((item,index)=>albumInfo.ID === 0 ?
+            (<MyplaylistItem key={index}
                 handleClick={this.handleClick}
                 isPlaying={index===info.playingIndex}
                 index={index}
                 uri={item.uri}
                 title={item.title}
                 info={item.info} />
-        ))
+            ):(
+            <AlbumItem key={index}
+                handleClick={this.handleClick}
+                isPlaying={index===info.playingIndex}
+                index={index}
+                uri={item.uri}
+                title={item.title}
+                info={item.info} />
+            ))
         return (
             <View style={styles.container}>
                 <ScrollView style={styles.scroll}
@@ -234,193 +252,5 @@ const styles = StyleSheet.create({
         fontWeight:'normal',
         color:'#121111',
         //color:'#767171'
-    }
-})
-
-class MusicItem extends Component{
-    constructor(props){
-        super(props)
-        this.state={isOpen:false}
-    }
-    toggleInfo=()=>this.setState({isOpen:!this.state.isOpen})
-    render(){
-        const {isOpen} = this.state
-        const {isPlaying, index, title, uri, handleClick} = this.props
-        return (
-            <View style={itemStyle}>
-                <View style={itemStyle.topPadding} />
-                <TouchableOpacity style={itemStyle.mainContainer} onPress={()=>handleClick(index)}>
-                    <View style={itemStyle.indexContainer}>
-                        {
-                            // Index
-                            !isPlaying ? ( <Text style={itemStyle.indexText}> {index+1} </Text>):
-                                (<Image style={itemStyle.indexImage}
-                                    source={require('../../assets/icons/nowPlaying.png')}/>)
-                        }
-                    </View>
-                    <View style={itemStyle.titleContainer}>
-                        <Text style={itemStyle.title}>{title}</Text>
-                    </View>
-                    <View style={itemStyle.openButtonContainer}>
-                        <TouchableOpacity style={itemStyle.openButton} onPress={this.toggleInfo}>
-                            <Image style={itemStyle.openButtonImage} source={require('../../assets/icons/lyric.png')}/>
-                        </TouchableOpacity>
-                    </View>
-                </TouchableOpacity>
-
-                <View style={[itemStyle.lyricContainer, {display:isOpen?'flex':'none'}]}>
-                    <View style={itemStyle.topPaddingInLyric}/>
-                    <Text style={itemStyle.lyric} >
-                        {isOpen ? this.props.info : null}
-                    </Text>
-                </View>
-                <View style={itemStyle.bottomPadding} />
-            </View>
-        )
-    }
-}
-/*
-const MusicItem = (props)=>{
-    //const {isPlaying, isCurrent, isLogin, index, title, albumInfo, playingAlbumID, musiclist, nowIndex, isLoaded} = props
-    //const albumID=albumInfo.ID
-    //const {handleNext, handlePause, handleUpdate, handleResume} = props
-    //const lyricHeight = props.lyricHeight ? props.lyricHeight : 0
-    return(
-        <View style={[itemStyle.container,{height:(74+lyricHeight)}]}>
-
-            <TouchableOpacity style={[itemStyle.mainContainer,{height:74}]}
-                onPress={()=>{
-                    if(!isLoaded&&isPlaying)
-                        return
-                    else if(playingAlbumID!==albumID)
-                        return handleUpdate({albumID, index, list:musiclist, info:albumInfo.ID===0?null:albumInfo})
-                    else if(nowIndex !== index)
-                        return handleNext({index})
-                    else if(isPlaying===false){
-                        return handleResume()}
-                    else{
-                        return handlePause()}
-                }}>
-                <View style={itemStyle.indexContainer}>
-                    {PlayButton(index, isCurrent)}
-                </View>
-                <View style={itemStyle.titleContainer}>
-                    <Text style={isCurrent?itemStyle.chooseTitle:itemStyle.title}>
-                        {title}
-                    </Text>
-                </View>
-                <View style={itemStyle.openButtonContainer}>
-                    <TouchableOpacity style={itemStyle.openButton}
-                        onPress={()=>{
-                            if(props.lyricHeight)
-                                props.handleCloseLyric(props.index-1)
-                            else
-                                props.handleOpenLyric(props.index-1)
-                        }}>
-                        <Image style={itemStyle.openButtonImage} source={require('../icon/lyric.png')}/>
-                    </TouchableOpacity>
-                </View>
-            </TouchableOpacity>
-            <View style={[itemStyle.lyricContainer, {height:lyricHeight,borderTopColor:'#EAE8E8', borderTopWidth:lyricHeight===0?0:1,}]}>
-                <Text style={[itemStyle.lyric, {display: lyricHeight===0?'none':'flex'}]}
-                    numberOfLines={props.lyricLine}>
-                    {props.info}
-                </Text>
-            </View>
-            <View style={itemStyle.bottomPadding} />
-        </View>
-    )
-}*/
-
-const itemStyle = StyleSheet.create({
-    container:{
-        width:'100%',
-        justifyContent:"center",
-        alignItems:'center',
-        backgroundColor:'#fff'
-    },
-    mainContainer:{
-        flexDirection:'row',
-        flex:1,
-    },
-    indexContainer:{
-        height:'100%',
-        width:30,
-        justifyContent:'center',
-        alignItems:'center'
-    },
-    indexText:{
-        color:'#121111',
-        fontSize:15,
-        color:'#767171',
-        textAlign:'center'
-    },
-    indexImage:{
-        width:'50%',
-        height:'50%',
-        resizeMode:'contain'
-    },
-    titleContainer:{
-        height:'100%',
-        flex:1,
-        paddingLeft:10,
-        justifyContent:'center'
-    },
-    title:{
-        fontSize:16,
-        color:'#121111'
-    },
-    artist:{
-        fontSize:14,
-        color:'#767171',
-        marginTop:1
-    },
-    chooseTitle:{
-        fontSize:16,
-        color:'#121111',
-        fontWeight:'900'
-    },
-    openButtonContainer:{
-        height:40,
-        width:40,
-        alignSelf:'center'
-    },
-    openButton:{
-        width:'100%',
-        height:'100%',
-        justifyContent:'center',
-        alignItems:'center'
-    },
-    openButtonImage:{
-        width:20,
-        height:20,
-        resizeMode:'contain'
-    },
-
-    lyricContainer:{
-        width:'80%',
-        justifyContent:"center",
-        alignSelf:'center'
-    },
-    lyric:{
-        fontSize:13,
-        textAlign:'center',
-        lineHeight:20
-    },
-    topPadding:{
-        width:'100%',
-        height:10,
-    },
-    topPaddingInLyric:{
-        width:'100%',
-        height:10,
-        borderTopColor:'#EAE8E8',
-        borderTopWidth:0.8
-    },
-    bottomPadding:{
-        width:'100%',
-        height:10,
-        borderBottomColor:'#EAE8E8',
-        borderBottomWidth:0.8
     }
 })

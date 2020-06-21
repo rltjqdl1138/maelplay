@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import {View, StyleSheet, Animated, PanResponder, Dimensions, Text, TouchableOpacity, Image, ScrollView} from 'react-native'
 import MiniPlaybar from '../Components/Miniplaybar'
+import {AlbumItem, MyplaylistItem} from '../Components/MusicInfoItem'
 //import PlayingContainer from '../containers/PlayingContainer'
 //import MiniPlaybar from '../components/MiniPlaybar'
 //import { AudioActions  } from '../store/actionCreator'
@@ -278,15 +279,24 @@ class MainPlayerContainer extends Component {
     render(){
         const {info, next, pause} = this.props.musicHandler
         const index = info.playingIndex
-        const list = info.playlist.map((item,index)=>(
-            <MusicItem key={index}
+        const albumID = info.playingAlbumID
+        const list = info.playlist.map((item,index)=> albumID === 0 ?
+            (<MyplaylistItem key={index}
                 handleClick={this.handleClick}
                 isPlaying={index===info.playingIndex}
                 index={index}
                 uri={item.uri}
                 title={item.title}
                 info={item.info} />
-        ))
+            ):(
+            <AlbumItem key={index}
+                handleClick={this.handleClick}
+                isPlaying={index===info.playingIndex}
+                index={index}
+                uri={item.uri}
+                title={item.title}
+                info={item.info} />
+            ))
         return (
             <View style={styles.container}>
                 <ScrollView style={styles.scroll}
@@ -450,141 +460,5 @@ const styles = StyleSheet.create({
     minibarImage:{
         resizeMode:'contain',
         flex:1
-    }
-})
-
-class MusicItem extends Component{
-    constructor(props){
-        super(props)
-        this.state={isOpen:false}
-    }
-    toggleInfo=()=>this.setState({isOpen:!this.state.isOpen})
-    render(){
-        const {isOpen} = this.state
-        const {isPlaying, index, title, uri, handleClick} = this.props
-        return (
-            <View style={itemStyle}>
-                <View style={itemStyle.topPadding} />
-                <TouchableOpacity style={itemStyle.mainContainer} onPress={()=>handleClick(index)}>
-                    <View style={itemStyle.indexContainer}>
-                        {
-                            // Index
-                            !isPlaying ? ( <Text style={itemStyle.indexText}> {index+1} </Text>):
-                                (<Image style={itemStyle.indexImage}
-                                    source={require('../../assets/icons/nowPlaying.png')}/>)
-                        }
-                    </View>
-                    <View style={itemStyle.titleContainer}>
-                        <Text style={itemStyle.title}>{title}</Text>
-                    </View>
-                    <View style={itemStyle.openButtonContainer}>
-                        <TouchableOpacity style={itemStyle.openButton} onPress={this.toggleInfo}>
-                            <Image style={itemStyle.openButtonImage} source={require('../../assets/icons/lyric.png')}/>
-                        </TouchableOpacity>
-                    </View>
-                </TouchableOpacity>
-
-                <View style={[itemStyle.lyricContainer, {display:isOpen?'flex':'none'}]}>
-                    <View style={itemStyle.topPaddingInLyric}/>
-                    <Text style={itemStyle.lyric} >
-                        {isOpen ? this.props.info : null}
-                    </Text>
-                </View>
-                <View style={itemStyle.bottomPadding} />
-            </View>
-        )
-    }
-}
-
-const itemStyle = StyleSheet.create({
-    container:{
-        width:'100%',
-        justifyContent:"center",
-        alignItems:'center',
-        backgroundColor:'#fff'
-    },
-    mainContainer:{
-        flexDirection:'row',
-        flex:1,
-    },
-    indexContainer:{
-        height:'100%',
-        width:30,
-        justifyContent:'center',
-        alignItems:'center'
-    },
-    indexText:{
-        color:'#121111',
-        fontSize:15,
-        color:'#767171',
-        textAlign:'center'
-    },
-    indexImage:{
-        width:'50%',
-        height:'50%',
-        resizeMode:'contain'
-    },
-    titleContainer:{
-        height:'100%',
-        flex:1,
-        paddingLeft:10,
-        justifyContent:'center'
-    },
-    title:{
-        fontSize:16,
-        color:'#121111'
-    },
-    artist:{
-        fontSize:14,
-        color:'#767171',
-        marginTop:1
-    },
-    chooseTitle:{
-        fontSize:16,
-        color:'#121111',
-        fontWeight:'900'
-    },
-    openButtonContainer:{
-        height:40,
-        width:40,
-        alignSelf:'center'
-    },
-    openButton:{
-        width:'100%',
-        height:'100%',
-        justifyContent:'center',
-        alignItems:'center'
-    },
-    openButtonImage:{
-        width:20,
-        height:20,
-        resizeMode:'contain'
-    },
-
-    lyricContainer:{
-        width:'80%',
-        justifyContent:"center",
-        alignSelf:'center'
-    },
-    lyric:{
-        fontSize:13,
-        textAlign:'center',
-        lineHeight:20
-    },
-    topPadding:{
-        width:'100%',
-        height:10,
-    },
-    topPaddingInLyric:{
-        width:'100%',
-        height:10,
-        borderTopColor:'#EAE8E8',
-        borderTopWidth:0.8
-    },
-    bottomPadding:{
-        width:'100%',
-        height:10,
-        borderBottomColor:'#EAE8E8',
-        borderBottomWidth:0.8
     }
 })

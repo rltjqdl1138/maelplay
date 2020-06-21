@@ -108,7 +108,45 @@ exports.getAccountinfo = async (token)=>{
     }catch(e){
         return {success:false}
     }
+}
 
+//
+// * SIGN UP *
+//
+exports.getCountryCode = async()=>{
+    try{
+        const response = await fetch(URL+'/api/authentication/countrycode', {
+            method:'GET',
+            headers: {'Content-Type':'application/json'}
+        })
+        const data = await response.json()
+        return data
+    }catch(e){
+        console.warn(e)
+        return {success:false}
+    }
+}
+exports.mobileAuth = async(mobile, countryCode, type) =>{
+    if(!mobile || !countryCode || mobile.length < 10 || mobile.length > 11)
+        return { success:false }
+    const response = await fetch(URL+'/api/authentication/message',{
+        method:'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({mobile, countryCode, type})
+    })
+    const data = await response.json()
+    return data
+
+}
+exports.checkMobileAuth = async(mobile, countryCode, key) =>{
+    if(!mobile || !countryCode || mobile.length < 10 || mobile.length > 11)
+        return {success:false}
+    const response = await fetch(URL+`/api/authentication/message?mobile=${mobile}&countrycode=${countryCode}&key=${key}`,{
+        method:'GET',
+        headers:{ 'Content-Type': 'application/json' }
+    })
+    const data = await response.json()
+    return data
 }
 
 

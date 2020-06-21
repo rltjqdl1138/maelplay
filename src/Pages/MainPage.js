@@ -9,11 +9,7 @@ import SearchComponent from '../Header/SearchComponent'
 import ThemeContainer from '../Containers/ThemeContainer'
 import AlbumContainer from '../Containers/AlbumContainer'
 import PlayingPage from './PlayingPage'
-import {url, Music} from '../NetworkHandler'
-//import * as SecureStore from 'expo-secure-store';
-//import { connect } from 'react-redux'
-//import { AuthenticationActions, AudioActions, MyPlaylistActions, ThemeActions  } from '../store/actionCreator'
-
+import { Music } from '../NetworkHandler'
 /*
 import HeaderContainer from '../containers/HeaderContainer'
 import SearchContainer from '../containers/SearchContainer'

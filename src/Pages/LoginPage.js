@@ -46,7 +46,7 @@ export default class LoginContainer extends Component {
             case !auth:
             case !auth.handleLogin:
             case typeof auth.handleLogin !== 'function':
-                return navigator.pop('LoginPage')
+                return navigator.pop('Loginpage')
 
             case !id:
             case id.length < 8 :
@@ -181,7 +181,7 @@ export default class LoginContainer extends Component {
                         <View style={{flex:1, flexDirection:'row', paddingLeft:20, paddingRight:20}}>
                             <View style={styles.signupButtonContainer}>
                                 <TouchableOpacity style={styles.enterButton}
-                                    onPress={()=>{navigator.push('SignupPage')}}>
+                                    onPress={()=>{navigator.push('Signuppage')}}>
                                     <Image style={{resizeMode:'contain', width:'100%',height:'100%'}}
                                         source={require('../../assets/icons/signup.png')} />
                                 </TouchableOpacity>
