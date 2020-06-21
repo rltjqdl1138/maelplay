@@ -17,36 +17,15 @@ export default class AlbumContainer extends Component {
             albumInfo:{}
         }
     }
-    handleAddPlaylist(items){
-        /*
-        const {myPlaylist} = this.props
-        const itemlist = items.map((item,index)=>{
-            const albumTitle = this.state.albumInfo ? this.state.albumInfo.title : undefined
-            const checkOverlap = (element) => element.ID === item.ID
-            const isOverlap = myPlaylist.findIndex(checkOverlap)
-            if(isOverlap < 0)
-                return {...item, index:myPlaylist.length+index+1, albumTitle}
-            return {...item, ID:Date.now() + ':' +item.ID, index:myPlaylist.length+index+1,
-                albumTitle}
-        })
-        const result = [...myPlaylist, ...itemlist]
-        MyPlaylistActions.update({list:result})
-        if(this.props.playingAlbumID===0)
-            AudioActions.update({albumID:0, list:result, index:this.props.index})
-        */
-    }
     componentDidMount(){
         const {albumID} = this.props.config;
-        if(!this.props.handler.Music)
+        if(!this.props.handler.Music || !this.props.handler.Myplaylist)
             return navigator.pop()
-        return albumID === 0 ?
-            // * LOAD MY PLAYLIST *
-            this.setState(state=>({
-                isLoaded:true,
-                albumInfo: {ID:0, title:'My Playlist'},
-                musicPlaylist: []
-            })) :
-            // * LOAD ALBUM FROM SERVER *
+        if(albumID === 0){
+            this.loadMyPlaylist()
+            this.props.handler.Myplaylist.setHandler(this.loadMyPlaylist)
+        }
+        else
             (async()=>{
                 const data1 = await Music.getAlbum(albumID)
                 const data2 = await Music.getMusicList(albumID)
@@ -60,8 +39,28 @@ export default class AlbumContainer extends Component {
                         musicPlaylist: data2.data }))
                     }
             })()
-
     }
+    componentWillUnmount(){
+        this.props.handler.Myplaylist.setHandler(()=>{})
+    }
+    loadMyPlaylist = async ()=>
+        this.setState(state=>({
+            isLoaded:true,
+            albumInfo: {ID:0, title:'My Playlist'},
+            musicPlaylist: this.props.handler.Myplaylist.info ? this.props.handler.Myplaylist.info : []
+        }))
+    
+    handleAddPlaylist = async ()=>{
+        const { Myplaylist } = this.props.handler
+        const result = await Myplaylist.append(this.state.musicPlaylist)
+        result.success ? alert(result.data + '곡이 추가되었습니다.'): null
+        
+    }
+    handleDeletePlaylist = async (index)=>{
+        await this.props.handler.Myplaylist.remove(index)
+    }
+    
+    
     handleClick = (index)=>{
         (async()=>{
             const {musicPlaylist, albumInfo} = this.state
@@ -98,25 +97,28 @@ export default class AlbumContainer extends Component {
                         {albumInfo.artist}
                     </Text>
                 </View>
-
-                <TouchableOpacity style={{width:18, paddingTop:8, paddingRight:0}}
-                        onPress={()=>{this.handleAddPlaylist(this.state.musicPlaylist); alert('리스트에 추가되었습니다') }} >
-                        <Image style={{width:13,height:13,resizeMode:'cover'}}
-                            source={require('../../assets/icons/add.png')} />
-                </TouchableOpacity>
-                
+                {albumInfo.ID ? this.getAddButton() : null}
             </View>)
+    }
+    getAddButton = ()=>{
+        return (
+            <TouchableOpacity style={{width:18, paddingTop:8, paddingRight:0}}
+                onPress={()=>this.handleAddPlaylist()} >
+                <Image style={{width:13,height:13,resizeMode:'cover'}}
+                    source={require('../../assets/icons/add.png')} />
+            </TouchableOpacity>
+        )
     }
     render(){
         const {isLoaded, musicPlaylist, albumInfo} = this.state
         const info = this.props.handler && this.props.handler.Music ? this.props.handler.Music.info : {}
-        //const { title, isLogin, index, albumID, playingAlbumID, isPlaying, isLoaded } = this.props
-        //const isDisabled = playingAlbumID === albumID
+        const {playingAlbumID} = this.props.handler
         const isDisabled = info.playingAlbumID === albumInfo.ID
         const list = musicPlaylist.map((item,index)=>albumInfo.ID === 0 ?
             (<MyplaylistItem key={index}
                 handleClick={this.handleClick}
-                isPlaying={index===info.playingIndex}
+                handleDeletePlaylist={this.handleDeletePlaylist}
+                isPlaying={index===info.playingIndex && albumInfo.ID === playingAlbumID}
                 index={index}
                 uri={item.uri}
                 title={item.title}

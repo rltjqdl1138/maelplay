@@ -52,8 +52,22 @@ exports.MyplaylistItem = class MyplaylistItem extends Component{
         super(props)
         this.state={isOpen:false}
     }
-    isOpen = false
+    isOpen=false
     translateX = new Animated.Value(screenWidth);
+    openOption = ()=>{
+        Animated.timing(this.translateX, {
+            toValue: BOX_POS,
+            duration: 200
+        }).start();
+        this.isOpen = true
+    }
+    closeOption = ()=>{
+        Animated.timing(this.translateX, {
+            toValue: screenWidth,
+            duration: 200
+        }).start();
+        this.isOpen = false
+    }
     _panResponder = PanResponder.create({
         onMoveShouldSetResponderCapture: () => true,
         onMoveShouldSetPanResponderCapture: () => true,
@@ -61,26 +75,16 @@ exports.MyplaylistItem = class MyplaylistItem extends Component{
                 this.translateX.setValue(dx + (this.isOpen ? BOX_POS : screenWidth)) ,
         onPanResponderRelease: (e, {vx, dx}) => {
             if(this.isOpen){
-                if ( vx >= 0.2 || dx >= 0.2 * screenWidth) {
-                    Animated.timing(this.translateX, {
-                        toValue: screenWidth,
-                        duration: 200
-                    }).start();
-                    this.isOpen = false
-                }else{
+                if ( vx >= 0.2 || dx >= 0.2 * screenWidth) 
+                    this.closeOption()
+                else
                     Animated.spring(this.translateX, {
                         toValue: BOX_POS,
                         bounciness: 10
                     }).start();
-                }
-
-            }else if ( vx <= -0.1 || dx <= -0.2 * screenWidth) {
-                    Animated.timing(this.translateX, {
-                        toValue: BOX_POS,
-                        duration: 200
-                    }).start();
-                    this.isOpen = true
-            }else {
+            }else if ( vx <= -0.1 || dx <= -0.2 * screenWidth)
+                this.openOption()
+            else {
                 Animated.spring(this.translateX, {
                     toValue: screenWidth,
                     bounciness:10
@@ -120,11 +124,11 @@ exports.MyplaylistItem = class MyplaylistItem extends Component{
     toggleInfo=()=>this.setState({isOpen:!this.state.isOpen})
     render(){
         const {isOpen} = this.state
-        const {isPlaying, index, title, uri, handleClick} = this.props
+        const {isPlaying, index, title, handleClick} = this.props
         return (
             <View style={itemStyle} {...this._panResponder.panHandlers}>
                 <View style={itemStyle.topPadding} />
-                <TouchableOpacity style={itemStyle.mainContainer} onPress={()=>handleClick(index)}>
+                <TouchableOpacity style={itemStyle.mainContainer} onPress={()=>this.isOpen?this.closeOption():handleClick(index)}>
                     <View style={itemStyle.indexContainer}>
                         {
                             // Index
@@ -151,12 +155,9 @@ exports.MyplaylistItem = class MyplaylistItem extends Component{
 
                                 </TouchableOpacity>
                             </View>
-                            <TouchableOpacity onPress={()=>{
-                                    alert('delete')
-                                }}
+                            <TouchableOpacity onPress={()=>{ this.closeOption(); this.props.handleDeletePlaylist(index)}}
                                 style={{flex:1,backgroundColor:'#FF6E43', justifyContent:'center'}}>
                                     <Text style={{textAlign:'center',fontSize:13, color:'white'}}>Delete</Text>
-
                             </TouchableOpacity>
                         </Animated.View>
                 </TouchableOpacity>

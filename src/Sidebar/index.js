@@ -13,12 +13,12 @@ const screenHeight = Dimensions.get('window').height
 const screenWidth = Dimensions.get('window').width
 
 class MainComponent extends Component{
-    handleWholePush=(page)=>{
-        this.props.handleWholePush(page)
+    handleWholePush=(page, config)=>{
+        this.props.handleWholePush(page, config)
         this.props.handleClose()
     }
-    handleMainPush=(page)=>{
-        this.props.handleMainPush(page)
+    handleMainPush=(page, config)=>{
+        this.props.handleMainPush(page, config)
         this.props.handleClose()
     }
     getComponent=()=>{

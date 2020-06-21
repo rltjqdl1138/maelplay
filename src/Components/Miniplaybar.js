@@ -57,13 +57,14 @@ export default class MiniPlayingbar extends Component{
                             />
 
                             <TouchableOpacity style={styles.buttonItem}
-                                onPress={()=>{ musicHandler.next()}}>
+                                onPress={()=>{ musicHandler.next(undefined, true)}}>
                                     <Image style={styles.buttonItemImage}
                                         source={require('../../assets/icons/next.png')} />
                             </TouchableOpacity>
 
                             <TouchableOpacity style={styles.buttonItem}
-                                onPress={()=>{ /* ADD to myplaylist */ }}>
+                                disabled={!albumInfo.ID}
+                                onPress={()=>this.props.myplaylistHandler.append(playInfo)}>
                                     <Image style={styles.addItemImage}
                                         source={require('../../assets/icons/add.png')} />
                             </TouchableOpacity>
@@ -233,6 +234,7 @@ class PlayingBar extends Component {
         else if (playbackStatus.isPlaying && this.state.isMoving === false)
             this.setState(state=>({
                 ...state,
+                progress: playbackStatus.positionMillis / duration,
                 ms: playbackStatus.positionMillis,
                 duration
             }))

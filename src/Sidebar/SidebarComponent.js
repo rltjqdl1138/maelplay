@@ -16,11 +16,11 @@ exports.LoginSidebar = class LoginSidebar extends Component{
                 <View style={styles.signContainer}>
                     <TouchableOpacity onPress={()=>{handleWholePush('AccountInfoPage')}}>
                         <Text style = {styles.usernameText}>
-                            {auth.name ? auth.name + " 님," : "blank"}
+                            {auth.name ? auth.name + " 님," : ""}
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.gotoPlaylistContainer}
-                        onPress={()=>handleMainPush('MyPlaylistPage')} >
+                        onPress={()=>handleMainPush('Albumcontainer', {albumID:0})} >
                         <Text style={styles.gotoPlaylistText}>내 플레이리스트 {">"} </Text>
                     </TouchableOpacity>
                 </View>

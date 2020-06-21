@@ -1,22 +1,30 @@
 import configuration from './configuration'
+import * as FileSystem from 'expo-file-system'
 const {URL} = configuration
 
-import * as FileSystem from 'expo-file-system'
-
-
+exports.getMyPlaylist = async()=>{
+    const fileUri = FileSystem.documentDirectory + 'my_play_list.mael'
+    const file = await FileSystem.getInfoAsync(fileUri)
+    if(!file || !file.exists)
+        await FileSystem.writeAsStringAsync(fileUri, 'MYPLAYLIST[]')
+    const result = (await FileSystem.readAsStringAsync(fileUri)).replace('MYPLAYLIST',"")
+    return JSON.parse(result)
+}
+exports.setMyPlaylist = async(list)=>{
+    const fileUri = FileSystem.documentDirectory + 'my_play_list.mael'
+    const data = JSON.stringify(list)
+    await FileSystem.writeAsStringAsync(fileUri, 'MYPLAYLIST'+data)
+}
 exports.getMusicFromCache = async(uri) =>{
     const fileUri = FileSystem.cacheDirectory + uri +'.mp3'
     //const CacheTable = await _getCacheTable()
     const file = await FileSystem.getInfoAsync(fileUri)
     if(file && file.exists){
-        //if(!CacheTable[uri])
-        //    _appendNewItem({uri, fileUri})
         return {uri:file.uri,status:'old'}
     }
     const remoteUri = URL + '/music/' + uri
     const downloadFile = await FileSystem.downloadAsync(remoteUri, fileUri)
     if(downloadFile.status === 200 || downloadFile.status === 201){
-    //    _appendNewItem({uri, fileUri})
         return {uri:downloadFile.uri, status:'new'}
     }
     return {status:'fail', uri:remoteUri}

@@ -33,6 +33,7 @@ class MainPage extends Component {
         super(props)
         this.state = {
             isLoaded:false,
+            myPlaylistInfo:[],
             musicInfo:{soundObject:null, isLoaded:false, isPlaying:false, playlist:[], playingAlbum:{}, playOption:SEQUENTE, playingIndex:-1, playingAlbumID:-1},
             searchNavigator:{open:()=>{this.handleOpenSearch()}, close:()=>{this.handleCloseSearch()}, status:false},
             sidebarNavigator:{open:()=>{}, close:()=>{}, status:''},
@@ -40,7 +41,7 @@ class MainPage extends Component {
         }
     }
     componentDidMount(){
-        //this.loadMyPlaylist()
+        this.loadMyPlaylist()
         this.createSoundObject()
         this.handleChange('isLoaded', true)
     }
@@ -51,6 +52,9 @@ class MainPage extends Component {
 
     handleChange = (field, text) => this.setState({ [field]: text });
     
+    // *        *
+    // * SOUNDS *
+    // *        *
     createSoundObject = async()=>{
         try{
             await Audio.setAudioModeAsync({
@@ -83,6 +87,10 @@ class MainPage extends Component {
             this.handleChange('musicInfo',{...this.state.musicInfo, isPlaying:false, playingIndex:index})
         }
     }
+    changeOption = async(index)=>{
+        index === 0 || index === 1 || index === 2 ?
+            this.handleChange('musicInfo',{...this.state.musicInfo, playOption:index}) : null
+    }
     SetHandler = async(statusFunction)=>{
         return await this.state.musicInfo.soundObject.setOnPlaybackStatusUpdate(statusFunction)
     }
@@ -97,10 +105,15 @@ class MainPage extends Component {
         await this.state.musicInfo.soundObject.playAsync()
         this.handleChange('musicInfo',{...this.state.musicInfo, isPlaying:true})
     }
+    StopSound = async()=>{
+        await this.state.musicInfo.soundObject.pauseAsync()
+        await this.state.musicInfo.soundObject.unloadAsync()
+        this.handleChange('musicInfo', {...this.state.musicInfo, isPlaying:false, playlist:[], playingIndex:-1, playingAlbumID:-1})
+    }
     JumpSound = async(ms)=>{
         return await this.state.musicInfo.soundObject.setPositionAsync(ms)
     }
-    NextSound = async(_index)=>{
+    NextSound = async(_index, isClick)=>{
         const {playingIndex, playOption} = this.state.musicInfo
         let nextIndex;
         switch(playOption){
@@ -110,33 +123,66 @@ class MainPage extends Component {
                 //TODO: random
                 nextIndex = playingIndex + 1; break;
             case REPEAT:
-                nextIndex = nextIndex = playingIndex; break;
+                nextIndex = nextIndex = isClick ? playingIndex+1 :playingIndex; break;
         }
         const index = _index === undefined ? nextIndex : _index
         await this.LoadSound(index)
     }
 
-    /*
-    loadMyPlaylist = async() =>{
-        const data = await networkHandler.music.getMusicList(1)
-        if(!data || !data.musics || !data.album)
-            console.warn(data)
-        else
-            MyPlaylistActions.load({list:data.musics})
-    }*/
-
-    /*
-
-    getMusicList = () =>{
-        const {themeList} = this.props
-        const themeTitle = themeList.map(dat=>({
-            ID:dat.ID,
-            title:dat.title
-        }))
-        const list = [...themeTitle]
-        return list
+    //
+    // * MY PLAYLIST *
+    //
+    
+    loadMyPlaylist = async()=>{
+        const result = await Music.getMyPlaylist()
+        this.handleChange('myPlaylistInfo', result)
     }
-    */
+    AppendMyPlaylist = async(data)=>{
+        const {myPlaylistInfo} = this.state
+        let newList = []
+        // Append list
+        if(data.length && data.length > 0)
+            newList = [...myPlaylistInfo, ...data]
+        // Append a Item
+        else if(data.MID && data.title)
+            newList = [...myPlaylistInfo, data]
+        
+        // Set List
+        await this.handleChange('myPlaylistInfo', newList)
+        Music.setMyPlaylist(newList)
+        this.MyPlaylistHandler()
+        return {success:true, data: data.length?data.length : 1}
+    }
+    DeleteMyPlaylist = async (index)=>{
+        const {myPlaylistInfo, musicInfo} = this.state
+        let newList = []
+
+        // Unexcepted case
+        if(index=== undefined || typeof index !== 'number' || index < 0 || index >= myPlaylistInfo.length)
+            return;
+        if(musicInfo.playingAlbumID === 0 && musicInfo.playingIndex === index)
+            await this.StopSound()
+
+        if(index === 0)
+            newList = [...myPlaylistInfo.slice(1,myPlaylistInfo.length)]
+        else if(index === myPlaylistInfo.length - 1)
+            newList = [...myPlaylistInfo.slice(0, myPlaylistInfo.length-1)]
+        else
+            newList = [...myPlaylistInfo.slice(0, index), ...myPlaylistInfo.slice(index+1, myPlaylistInfo.length)]
+        
+        // Set List
+        await this.handleChange('myPlaylistInfo', newList)
+        Music.setMyPlaylist(newList)
+        this.MyPlaylistHandler()
+        return {success:true}
+    }
+    MyPlaylistHandler = ()=>{}
+    setMyPlaylistHandler = (handler)=>{
+        console.warn(handler)
+        if(typeof handler === 'function')
+            this.MyPlaylistHandler = handler
+    }
+
     handleWholePush = (name, config) => this.props.navigator.push(name,config)
     handleWholePop = (name) => this.props.navigator.pop(name)
     
@@ -159,18 +205,20 @@ class MainPage extends Component {
     
     render(){
         //const {isLogin, token, username, showPlaybar} = this.props
-        const {LoadSound, NextSound, ResumeSound, PauseSound, UpdateSoundList, JumpSound, SetHandler} = this
+        const {LoadSound, NextSound, ResumeSound, PauseSound, UpdateSoundList, JumpSound, changeOption, SetHandler} = this
+        const {AppendMyPlaylist, DeleteMyPlaylist, setMyPlaylistHandler} = this
         const {handleMainPush, handleMainPop, handleWholePush, handleWholePop} = this
         //const headerPos = 60+deviceCheck.getTopPadding()
         const padding = 40
         const headerPos = 60 + padding
         //const musicList = getMusicList()
-        const musicHandler = { info:this.state.musicInfo, load:LoadSound, next:NextSound, resume:ResumeSound, pause:PauseSound, update:UpdateSoundList, jump:JumpSound, setHandler:SetHandler }
+        const musicHandler = { info:this.state.musicInfo, load:LoadSound, next:NextSound, resume:ResumeSound, pause:PauseSound, update:UpdateSoundList, jump:JumpSound, setOption:changeOption, setHandler:SetHandler }
+        const myplaylistHandler = {info:this.state.myPlaylistInfo, append:AppendMyPlaylist, remove:DeleteMyPlaylist, setHandler:setMyPlaylistHandler}
         return(
             <View style={styles.container}>
                 <View style={[styles.mainscreenContainer,{top:headerPos}]}>
 
-                    <Navigator register={this.registerNavigator} handler={{Music:musicHandler}}>
+                    <Navigator register={this.registerNavigator} handler={{Music:musicHandler, Myplaylist:myplaylistHandler}}>
                         <Route name="Themecontainer" component={ThemeContainer} />
                         <Route name="Albumcontainer" component={AlbumContainer} />
                     </Navigator>
@@ -186,7 +234,7 @@ class MainPage extends Component {
                     
                 </View>
                 {this.state.searchNavigator.status ? (<SearchComponent navigator={this.state.searchNavigator} headerPos={headerPos}/>) : null}
-                {musicHandler.info.playingAlbumID < 0 ? null :(<PlayingPage headerPos={headerPos} musicHandler={musicHandler}/>)}
+                {musicHandler.info.playingAlbumID < 0 ? null :(<PlayingPage headerPos={headerPos} musicHandler={musicHandler} myplaylistHandler={myplaylistHandler}/>)}
                 
                 <Sidebar
                     auth={this.props.auth}
@@ -200,54 +248,6 @@ class MainPage extends Component {
     }
 }
 
-class View1 extends Component{
-    render(){
-        return (
-            <View style={styles.container}>
-                <Text>View1</Text>
-                <TouchableOpacity onPress={()=>this.props.navigator.push('View2')}>
-                    <Text>Push</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={()=>this.props.navigator.pop('View1')}>
-                    <Text>Pop</Text>
-                </TouchableOpacity>
-            </View>
-        )
-    }
-}
-
-class View2 extends Component{
-    render(){
-        return (
-            <View style={styles.container}>
-                <Text>View2</Text>
-                <TouchableOpacity onPress={()=>this.props.navigator.push('View3')}>
-                    <Text>Push</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={()=>this.props.navigator.pop('View2')}>
-                    <Text>Pop</Text>
-                </TouchableOpacity>
-                <Text>{this.props.config.title}</Text>
-            </View>
-        )
-    }
-}
-
-class View3 extends Component{
-    render(){
-        return (
-            <View style={styles.container}>
-                <Text>View3</Text>
-                <TouchableOpacity onPress={()=>this.props.navigator.push('View4')}>
-                    <Text>Push</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={()=>this.props.navigator.pop('View3')}>
-                    <Text>Pop</Text>
-                </TouchableOpacity>
-            </View>
-        )
-    }
-}
 
 const styles = StyleSheet.create({
     container: {

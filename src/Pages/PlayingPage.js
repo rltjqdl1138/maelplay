@@ -149,13 +149,13 @@ export default class PlayingPage extends Component{
     render(){
         //const {isPlaying, showPlaybar, playlist, albumID, playOption, index, isLogin, token, isLoaded, isUpdated } = this.props
         //const albumInfo = this.props.albumInfo ? this.props.albumInfo : {ID:0, title:'My Playlist'}
-
         return(
             <Animated.View style={this.getStyle()}
                 {...this._panResponder.panHandlers} >
                 <Animated.View style={this.getMinibarStyle()}>
                     <MiniPlaybar minibarSize={minibarSize}
-                        musicHandler={this.props.musicHandler}/>
+                        musicHandler={this.props.musicHandler}
+                        myplaylistHandler={this.props.myplaylistHandler}/>
                 </Animated.View>
                 <View style={WholeStyle.main} >
                     <View style={{height:50, backgroundColor:'#fff'}}/>
@@ -277,7 +277,7 @@ class MainPlayerContainer extends Component {
             </View>)
     }
     render(){
-        const {info, next, pause} = this.props.musicHandler
+        const {info, next, pause, setOption} = this.props.musicHandler
         const index = info.playingIndex
         const albumID = info.playingAlbumID
         const list = info.playlist.map((item,index)=> albumID === 0 ?
@@ -310,13 +310,13 @@ class MainPlayerContainer extends Component {
                         </View>
                         <View style={styles.optionContainer}>
                             <TouchableOpacity style={[styles.optionButtonContainer, {backgroundColor:info.playOption===0?'red':'#fff'}]}
-                                onPress={()=>{}} >
+                                onPress={()=>{setOption(0)}} >
                             </TouchableOpacity>
                             <TouchableOpacity style={[styles.optionButtonContainer, {backgroundColor:info.playOption===1?'red':'#fff'}]}
-                                onPress={()=>{}} >
+                                onPress={()=>{setOption(1)}} >
                             </TouchableOpacity>
                             <TouchableOpacity style={[styles.optionButtonContainer, {backgroundColor:info.playOption===2?'red':'#fff'}]}
-                                onPress={()=>{}} >
+                                onPress={()=>{setOption(2)}} >
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -338,7 +338,7 @@ class MainPlayerContainer extends Component {
                                 />
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.minibarImageContainer}
-                                onPress={()=>{next()}}>
+                                onPress={()=>{next(undefined, true)}}>
                                 <Image style={styles.minibarImage}
                                     source={require('../../assets/icons/next.png')}
                                 />
