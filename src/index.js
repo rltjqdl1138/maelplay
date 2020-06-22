@@ -4,7 +4,7 @@ import * as SecureStore from 'expo-secure-store';
 import {Route, Navigator} from './Navigator'
 import MainPage from './Pages/MainPage'
 import LoginPage from './Pages/LoginPage'
-import {SignupPage, UserInfoPage, AccountInfoPage} from './Pages/Account' 
+import {SignupPage, UserInfoPage, AccountInfoPage, GreetingPage} from './Pages/Account' 
 
 
 export default class RootContainer extends Component{
@@ -16,7 +16,6 @@ export default class RootContainer extends Component{
     }
     componentDidMount(){
         this.loadAuthentication()
-
     }
     loadAuthentication = async()=>{
         try{
@@ -50,6 +49,7 @@ export default class RootContainer extends Component{
                 <Route name="Mainpage" component={MainPage} />
                 <Route name="Loginpage" component={LoginPage} />
                 <Route name="Signuppage" component={SignupPage} />
+                <Route name="Greetingpage" component={GreetingPage} />
                 <Route name="Userinfopage" component={UserInfoPage} />
                 <Route name="Accountinfopage" component={AccountInfoPage} />
             </Navigator>

@@ -3,7 +3,6 @@ import { StyleSheet, View, Text, TouchableOpacity, Image }from 'react-native'
 
 export default class GreetingPage extends Component{
     componentDidMount(){
-        
         setTimeout(()=>{
             this.props.navigator.pop()
         },1500)

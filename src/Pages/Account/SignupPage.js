@@ -218,8 +218,8 @@ export default class SignupPage extends Component {
                     return this.handleChange('idNotice',{text:`${id}는 이미 사용중인 아이디입니다.`})
                 
                 const response = await Account.registerAccount(payload)
-                response.success ? AuthenticationActions.login({token:signupToken, username:name}) : null
-                return response.success ? this.props.navigator.push('GreetingPage') : alert('실패')
+                response.success ? this.props.auth.handleLogin({token: response.data.token, name: response.data.name, platform:'original'}) : null
+                return response.success ? this.props.navigator.push('Greetingpage') : alert('실패')
         }
         
     }
@@ -227,7 +227,7 @@ export default class SignupPage extends Component {
     render(){
         const {handleChange} = this
         const {navigator} = this.props
-        const {idNotice, passwordNotice, mobileNotice, countryCodeList, isMessageSend, isLoaded} = this.state
+        const {idNotice, passwordNotice, mobileNotice, isMessageSend, isLoaded} = this.state
         const {birthday1, birthday2, birthday3} = this.state
         return(
             <View style={styles.container}>
@@ -333,7 +333,7 @@ export default class SignupPage extends Component {
                     
                     <View ref="phoneInput"/>
                     <View style={{paddingLeft:25, paddingRight:25}}>
-                        <Text style={styles.subtitle} >EMAIL / PHONE</Text>
+                        <Text style={styles.subtitle} >PHONE</Text>
                         <View style={{flexDirection:'row',width:'100%'}} >
 
                             <TouchableOpacity style={styles.countryCodeBox}
@@ -396,13 +396,11 @@ export default class SignupPage extends Component {
                     </View>
 
                     <View style={styles.enterButtonContainer}>
-                        <View style={styles.enterButton}>
-
-                        <Button
-                            title="Enter"
-                            onPress={async()=>{this.completeSignup()}}
-                        /> 
-                        </View>
+                        <TouchableOpacity style={styles.enterButton}
+                            onPress={async()=>{this.completeSignup()}}>
+                                <Image style={{width:'100%', height:'100%', resizeMode:'contain'}}
+                                    source={require('../../../assets/icons/signupComplete.png')} />
+                        </TouchableOpacity>
                     </View>
                 <View style={{width:'100%',height:this.state.height}} />
                 </ScrollView>
@@ -585,9 +583,8 @@ const styles=StyleSheet.create({
         alignItems:'center'
     },
     enterButton:{
-        width:80,
-        height:80,
-        backgroundColor:'#0f0'
+        width:200,
+        height:'100%',
     },
 
     bottomPadding:{

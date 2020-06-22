@@ -85,29 +85,28 @@ class Navigator extends Component {
             return;
     }*/
     handlePop = (sceneName) =>{
-        //const isThere = (element) => element['key'] === sceneName
+        const isThere = (element) => element['key'] === sceneName
         const { stack } = this.state
-        //const lastItem = stack[stack.length-1]
-        //const ind = stack.findIndex(isThere)
+        const lastItem = stack[stack.length-1]
+        const ind = stack.findIndex(isThere)
+        let middleStack = []
         if(stack.length === 1)
             return;
 
-            /*
+        
         switch(ind){
             case stack.length-1:
+                middleStack = [...stack]
                 break;
             case -1:
             case 0:
-                this.setState(state=>({ ...state,
-                    stack: [stack[0], lastItem]
-                }))
+                middleStack = [stack[0], lastItem]
+                this.setState(state=>({ ...state, stack: middleStack }))
                 break;
             default:
-                this.setState(state=>({ ...state,
-                    stack: [...stack.slice(0,ind), lastItem]
-                }))
+                middleStack = [...stack.slice(0,ind), lastItem]
+                this.setState(state=>({ ...state, stack: middleStack }))
         }
-*/
 
         Animated.timing(this._animatedValue,{
             toValue: this.width,
@@ -117,14 +116,9 @@ class Navigator extends Component {
             this._animatedValue.setValue(0)
             this.setState(state =>({
                 ...state,
-                stack: stack.slice(0, stack.length-1)
+                stack: middleStack.slice(0, middleStack.length-1)
             }))
         })
-        //if(ind === -1){
-        //    return stack.slice(1,stack.length)
-        //}
-
-        //return stack.slice(ind, stack.length)
     }
 
     render(){
