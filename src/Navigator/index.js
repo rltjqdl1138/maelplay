@@ -41,39 +41,45 @@ class Navigator extends Component {
 
     handlePush = (sceneName, config) =>{
         const { stack, sceneConfig } = this.state
-        if(!sceneConfig[sceneName])
-            return;
-    //    const isThere = (element) => element['key'] === sceneName    
-    //    const ind = stack.findIndex(isThere)
+        if(!sceneConfig[sceneName]) return;
 
+        const isThere = (element) => element['key'] === sceneName    
+        const ind = stack.findIndex(isThere)
+        let middleStack = []
+
+        const newConfig = sceneConfig;
+        newConfig[sceneName].config = config ? config : {}
     //BackHandler.addEventListener("hardwareBackPress", ()=>{this.handlePop(sceneName); return true})
-        //if(ind === -1){
 
-
-            const newConfig = sceneConfig;
-            newConfig[sceneName].config = config ? config : {}
-
-            this.setState(state => ({
-                sceneConfig: newConfig,
-                stack: [...stack, state.sceneConfig[sceneName]]
-            }),()=>{
+        switch(ind){
+            case -1:
+                this.setState(state => ({
+                    sceneConfig: newConfig,
+                    stack: [...stack, state.sceneConfig[sceneName]]
+                }),()=>{
+                    this._animatedValue.setValue(this.width)
+                    Animated.timing(this._animatedValue,{
+                        toValue: 0,
+                        duration: 300,
+                        useNativeDriver: true
+                    }).start()
+                })
+                break
+            case stack.length -1:
+                this.setState(state => ({
+                    ...state,
+                    sceneConfig: newConfig
+                }))
+                break;
+            default:
                 this._animatedValue.setValue(this.width)
+                middleStack = [ ...stack.slice(0,ind), ...stack.slice(ind+1, stack.length), state.sceneConfig[sceneName] ]
                 Animated.timing(this._animatedValue,{
                     toValue: 0,
                     duration: 300,
                     useNativeDriver: true
                 }).start()
-            })
-
-        //}else{
-        //    const newConfig = this.state.sceneConfig
-        //    newConfig[sceneName].config = config
-        //    this.setState(state => ({
-        //            ...this.state,
-        //            sceneConfig: newConfig
-        //        })
-        //    )
-        //}
+        }
     }
     /*
     handleReplace = (oldSceneName, newSceneName) =>{
@@ -85,14 +91,12 @@ class Navigator extends Component {
             return;
     }*/
     handlePop = (sceneName) =>{
-        const isThere = (element) => element['key'] === sceneName
         const { stack } = this.state
+        const isThere = (element) => element['key'] === sceneName
         const lastItem = stack[stack.length-1]
         const ind = stack.findIndex(isThere)
         let middleStack = []
-        if(stack.length === 1)
-            return;
-
+        if(stack.length === 1) return;
         
         switch(ind){
             case stack.length-1:
@@ -124,18 +128,15 @@ class Navigator extends Component {
     render(){
         return (
             <View style={styles.container}>
-                { this.state.stack && this.state.stack.length > 0 ?
+                {this.state.stack && this.state.stack.length > 0 ?
                     this.state.stack.map((scene, index)=>{
                         const CurrentScene = scene.component
                         const sceneStyles = [styles.scene]
 
-                        if(index === this.state.stack.length -1 && index > 0){
+                        if(index === this.state.stack.length -1 && index > 0)
                             sceneStyles.push({
-                                transform:[
-                                    { translateX: this._animatedValue}
-                                ]
+                                transform:[ {translateX: this._animatedValue} ]
                             })
-                        }
 
                         return (
                             <Animated.View key={scene.key} style={[sceneStyles]}>
@@ -147,8 +148,7 @@ class Navigator extends Component {
                                 />
                             </Animated.View>
                         )
-                    }): (<View />)
-                }
+                    }): null}
             </View>
 
         )

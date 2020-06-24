@@ -94,7 +94,6 @@ exports.getUserinfo = async (token)=>{
     }
 }
 exports.getAccountinfo = async (token)=>{
-
     try{
         const response = await fetch(URL+'/api/account/account',{
             method:'GET',
@@ -149,6 +148,21 @@ exports.checkMobileAuth = async(mobile, countryCode, key) =>{
     return data
 }
 
+exports.changeInfo = async(key, authToken, payload)=>{
+    try{
+        const response = await fetch(URL+'/api/account/user/'+key,{
+            method:'PUT',
+            headers:{
+                'Content-Type': 'application/json',
+                'x-access-token': authToken 
+            },body:JSON.stringify(payload)
+        })
+        const data = await response.json()
+        return data
+    }catch(e){
+        return {success:false}
+    }
+}
 
 
 
@@ -167,7 +181,6 @@ const getForgotID = async (name, email)=>{
     }
 
 }
-
 
 
 

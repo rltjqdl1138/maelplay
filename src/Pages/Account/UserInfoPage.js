@@ -32,13 +32,13 @@ export default class UserInformationPage extends Component{
         const {navigator} = this.props
         const {name, birthday, phone, isLoaded} = this.state
         const _infoList = [
-            {key:'성명', value:name, nextPage:null},
-            {key:'생년월일', value:birthday, nextPage:'ChangeBirthdaypage'},
-            {key:'전화번호', value:phone, nextPage:'ChangePhonepage'}
+            {key: 'name', value:name, name:'성명', disabled:true},
+            {key: 'birthday', value:birthday, name:'생년월일', disabled:false},
+            {key: 'phone', value:phone, name:'전화번호', disabled:false}
         ]
 
         const infoList = _infoList.map((item,index) =>
-            ( <InfoItem key={String(index)} payload={item} navigator={navigator} isLoaded={isLoaded} /> ))
+            ( <InfoItem key={String(index)} payload={item} navigator={navigator} isLoaded={isLoaded} handler={this.getUserinfo}/> ))
 
         return(   
             <View style={styles.container}>
@@ -57,24 +57,18 @@ export default class UserInformationPage extends Component{
 
 class InfoItem extends Component{
     render(){
-        const {payload, navigator, isLoaded} = this.props
-        const {key, value, nextPage} = payload
+        const {payload, navigator} = this.props
+        const {key, value, name, disabled} = payload
         return (
             <View style={styles.informContainer}>
-
                 <View style={styles.informTypeContainer}>
-                    <Text style={styles.informTypeText}>
-                        {key}
-                    </Text>
+                    <Text style={styles.informTypeText}>{name}</Text>
                 </View>
-
                 <TouchableOpacity style={styles.informValueContainer}
-                    disabled={!nextPage || !isLoaded}
-                    onPress={()=>{navigator.push(
-                        nextPage, {value, handler:()=>this.getUserinfo()})}}>
-                    <Text style={styles.informValueText}>{value}</Text>
-                </TouchableOpacity>
-                         
+                    disabled={disabled}
+                    onPress={()=>{navigator.push('Changeinfopage', {key, value, name, handler:this.props.handler})}}>
+                    <Text style={styles.informValueText}>{value.length ? value:'N/A'}</Text>
+                </TouchableOpacity>      
             </View>
         )
     }

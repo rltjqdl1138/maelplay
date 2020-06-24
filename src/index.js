@@ -4,7 +4,7 @@ import * as SecureStore from 'expo-secure-store';
 import {Route, Navigator} from './Navigator'
 import MainPage from './Pages/MainPage'
 import LoginPage from './Pages/LoginPage'
-import {SignupPage, UserInfoPage, AccountInfoPage, GreetingPage} from './Pages/Account' 
+import {SignupPage, UserInfoPage, AccountInfoPage, GreetingPage, ChangeInfoPage} from './Pages/Account' 
 
 
 export default class RootContainer extends Component{
@@ -52,6 +52,7 @@ export default class RootContainer extends Component{
                 <Route name="Greetingpage" component={GreetingPage} />
                 <Route name="Userinfopage" component={UserInfoPage} />
                 <Route name="Accountinfopage" component={AccountInfoPage} />
+                <Route name="Changeinfopage" component={ChangeInfoPage} />
             </Navigator>
         )
     }

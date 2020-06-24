@@ -19,14 +19,12 @@ import deviceCheck from '../deviceCheck'
 import PlayingPage from './PlayingPage'
 import MyPlaylistPage from './MyPlaylistPage'
 import SidebarPage from './SidebarPage'
-
 */
 import {Route, Navigator} from '../Navigator'
 
 const SEQUENTE = 0
 const SHUFFLE = 1
 const REPEAT = 2
-
 
 class MainPage extends Component {
     constructor(props){
@@ -87,16 +85,16 @@ class MainPage extends Component {
             this.handleChange('musicInfo',{...this.state.musicInfo, isPlaying:false, playingIndex:index})
         }
     }
-    changeOption = async(index)=>{
+    changeOption = async(index)=>
         index === 0 || index === 1 || index === 2 ?
             this.handleChange('musicInfo',{...this.state.musicInfo, playOption:index}) : null
-    }
-    SetHandler = async(statusFunction)=>{
-        return await this.state.musicInfo.soundObject.setOnPlaybackStatusUpdate(statusFunction)
-    }
-    UpdateSoundList = async(list, album)=>{
-        return this.handleChange('musicInfo',{...this.state.musicInfo, playingAlbumID:album.ID, playlist:list, playingAlbum:album})
-    }
+    
+    SetHandler = async(statusFunction)=>
+        await this.state.musicInfo.soundObject.setOnPlaybackStatusUpdate(statusFunction)
+    
+    UpdateSoundList = async(list, album)=>
+        this.handleChange('musicInfo',{...this.state.musicInfo, playingAlbumID:album.ID, playlist:list, playingAlbum:album})
+    
     PauseSound = async()=>{
         await this.state.musicInfo.soundObject.pauseAsync()
         this.handleChange('musicInfo',{...this.state.musicInfo, isPlaying:false})
@@ -110,9 +108,9 @@ class MainPage extends Component {
         await this.state.musicInfo.soundObject.unloadAsync()
         this.handleChange('musicInfo', {...this.state.musicInfo, isPlaying:false, playlist:[], playingIndex:-1, playingAlbumID:-1})
     }
-    JumpSound = async(ms)=>{
-        return await this.state.musicInfo.soundObject.setPositionAsync(ms)
-    }
+    JumpSound = async(ms)=>
+        await this.state.musicInfo.soundObject.setPositionAsync(ms)
+    
     NextSound = async(_index, isClick)=>{
         const {playingIndex, playOption} = this.state.musicInfo
         let nextIndex;
@@ -177,12 +175,9 @@ class MainPage extends Component {
         return {success:true}
     }
     MyPlaylistHandler = ()=>{}
-    setMyPlaylistHandler = (handler)=>{
-        console.warn(handler)
-        if(typeof handler === 'function')
-            this.MyPlaylistHandler = handler
-    }
-
+    setMyPlaylistHandler = (handler)=>
+        typeof handler === 'function' ? (this.MyPlaylistHandler = handler) : null
+    
     handleWholePush = (name, config) => this.props.navigator.push(name,config)
     handleWholePop = (name) => this.props.navigator.pop(name)
     

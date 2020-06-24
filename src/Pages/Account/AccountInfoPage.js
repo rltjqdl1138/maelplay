@@ -19,7 +19,7 @@ export default class AccountInformationContainer extends Component{
     }
     getAccountInfo = async()=>{
         const response = await Account.getAccountinfo(this.props.auth.token)
-        return !response.success ? this.props.navigator.pop('Accountinfopage') :
+        return !response.success || !response.data ? this.props.navigator.pop('Accountinfopage') :
             this.setState({
                 ID: response.data.id,
                 date: response.data.createDate,
@@ -32,9 +32,9 @@ export default class AccountInformationContainer extends Component{
         const {navigator} = this.props
         const {ID, date, planType, isLoaded} = this.state
         const _infoList = [
-                {key:'아이디', value:ID, nextPage:null},
-                {key:'가입일', value:date, nextPage:null},
-                {key:'플랜 타입', value:planType, nextPage:null} ]
+            {key:'아이디', value:ID, nextPage:null},
+            {key:'가입일', value:date, nextPage:null},
+            {key:'플랜 타입', value:planType, nextPage:null} ]
 
         const infoList = _infoList.map((item,index) =>
             ( <InfoItem key={String(index)} payload={item} navigator={navigator} isLoaded={isLoaded}/> ))
@@ -79,7 +79,7 @@ class InfoItem extends Component{
                 </View>
                 <TouchableOpacity style={styles.informValueContainer}
                     disabled={!nextPage || !isLoaded} onPress={()=>{
-                        navigator.push(nextPage, {value, handler:()=>this.AccountInfo()})}} >
+                        navigator.push('Changeinfopage', {value, handler:()=>this.AccountInfo()})}} >
                     <Text style={styles.informValueText}>
                         {value}
                     </Text>

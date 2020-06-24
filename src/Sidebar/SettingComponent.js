@@ -17,7 +17,7 @@ exports.LoginSetting = class LoginSetting extends Component{
         {title:'개인정보', handler:()=>this.props.handleWholePush('Userinfopage')},
         {title:'계정정보', handler:()=>this.props.handleWholePush('Accountinfopage')},
         {title:'공지사항', handler:()=>this.props.handleWholePush('Noticepage')},
-        {title: this.props.auth.platform==='original'?'비밀번호 변경':null, handler:()=>this.props.handleWholePush('ChangePasswordpage')},
+        {title: this.props.auth.platform==='original'?'비밀번호 변경':null, handler:()=>this.props.handleWholePush('Changeinfopage',{key:'password',name:'비밀번호',value:''})},
         {title:'이용안내 및 약관', handler:()=>this.props.handleWholePush('Planpage')},
         {title:'로그아웃', handler:()=>this.setState(({isModalVisible:true}))}
     ]
