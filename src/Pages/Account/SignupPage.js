@@ -189,7 +189,10 @@ export default class SignupPage extends Component {
     completeSignup = async()=>{
         const {id, password, passwordCheck, name, birthday1, birthday2, birthday3, phone, countryCode, signupToken} = this.state
         const {idNotice, passwordNotice, mobileNotice} = this.state
-        const birthday = (birthday1 + birthday2 + birthday3)
+        const birthday = birthday1 +
+            (birthday2.length === 1 ? '0'+birthday2 : birthday2) +
+            (birthday3.length === 1 ? '0'+birthday3 : birthday3)
+            
         switch(true){
             case id.length === 0:
             case password.length === 0:

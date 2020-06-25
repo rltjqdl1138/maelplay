@@ -4,7 +4,7 @@ import * as SecureStore from 'expo-secure-store';
 import {Route, Navigator} from './Navigator'
 import MainPage from './Pages/MainPage'
 import LoginPage from './Pages/LoginPage'
-import {SignupPage, UserInfoPage, AccountInfoPage, GreetingPage, ChangeInfoPage} from './Pages/Account' 
+import {SignupPage, UserInfoPage, AccountInfoPage, GreetingPage, ChangeInfoPage, FindIDPage, FindPasswordPage, ResetPasswordPage} from './Pages/Account' 
 
 
 export default class RootContainer extends Component{
@@ -36,13 +36,22 @@ export default class RootContainer extends Component{
             console.warn(e)
         }
     }
+    deleteAuthentication = async()=>{
+        try{
+            await SecureStore.deleteItemAsync('authentication')
+        }catch(e){
+            console.warn(e)
+        }
+    }
     handleChange = (field, text) => this.setState({ [field]: text });
     handleLogin=({name, token, platform})=>{
         name && token && platform ? this.handleChange('auth', {isLogin:true, name, token, platform}) : null
         this.saveAuthentication({token, name, platform})
     }
-    handleLogout=()=>
+    handleLogout=()=>{
+        this.deleteAuthentication()
         this.handleChange('auth', {isLogin:false, name:'no', token:'', platform:''})
+    }
     render(){
         return(
             <Navigator auth={{...this.state.auth, handleLogin:this.handleLogin, handleLogout:this.handleLogout}}>
@@ -53,6 +62,9 @@ export default class RootContainer extends Component{
                 <Route name="Userinfopage" component={UserInfoPage} />
                 <Route name="Accountinfopage" component={AccountInfoPage} />
                 <Route name="Changeinfopage" component={ChangeInfoPage} />
+                <Route name="Findidpage" component={FindIDPage} />
+                <Route name="Findpasswordpage" component={FindPasswordPage} />
+                <Route name="Resetpasswordpage" component={ResetPasswordPage} />
             </Navigator>
         )
     }

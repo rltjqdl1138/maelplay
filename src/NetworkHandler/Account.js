@@ -3,7 +3,7 @@ const {URL} = configuration
 
 exports.getCheckID = async (id, platform)=>{
     if(!id || id === '') return {}
-    const response = await fetch(URL+'/api/account/checkid?id='+id+'&platform='+(platform?platform:'original'))
+    const response = await fetch(URL+'/api/account/check/id?id='+id+'&platform='+(platform?platform:'original'))
     const data = await response.json()
     return data
 }
@@ -108,6 +108,21 @@ exports.getAccountinfo = async (token)=>{
         return {success:false}
     }
 }
+exports.changeInfo = async(key, authToken, payload)=>{
+    try{
+        const response = await fetch(URL+'/api/account/user/'+key,{
+            method:'PUT',
+            headers:{
+                'Content-Type': 'application/json',
+                'x-access-token': authToken 
+            },body:JSON.stringify(payload)
+        })
+        const data = await response.json()
+        return data
+    }catch(e){
+        return {success:false}
+    }
+}
 
 //
 // * SIGN UP *
@@ -148,15 +163,13 @@ exports.checkMobileAuth = async(mobile, countryCode, key) =>{
     return data
 }
 
-exports.changeInfo = async(key, authToken, payload)=>{
+
+
+exports.checkForgetID = async (name, birthday)=>{
     try{
-        const response = await fetch(URL+'/api/account/user/'+key,{
-            method:'PUT',
-            headers:{
-                'Content-Type': 'application/json',
-                'x-access-token': authToken 
-            },body:JSON.stringify(payload)
-        })
+        const response = await fetch(URL+`/api/account/check/forgetid?name=${name}&birthday=${birthday}`,{
+            method:'GET',
+            headers: { 'Content-Type': 'application/json'} })
         const data = await response.json()
         return data
     }catch(e){
@@ -164,14 +177,13 @@ exports.changeInfo = async(key, authToken, payload)=>{
     }
 }
 
-
-
-
-const getForgotID = async (name, email)=>{
+exports.getForgetID = async ({name, birthday, mobileToken})=>{
     try{
-        const response = await fetch(URL+`/api/account/forgotid?email=${email}&name=${name}`,{
+        const response = await fetch(URL+`/api/account/forgetid?name=${name}&birthday=${birthday}`,{
             method:'GET',
-            headers: { 'Content-Type': 'application/json'} })
+            headers: {
+                'Content-Type': 'application/json', 
+                'x-access-token': mobileToken } })
         const data = await response.json()
         return data
 
@@ -179,51 +191,25 @@ const getForgotID = async (name, email)=>{
         console.warn(e)
         return {success:false}
     }
-
 }
 
-
-
-const changeMobile = async (payload, authToken)=>{
-    const { mobile, token } = payload
+exports.resetPassword = async ({id, password, mobileToken})=>{
     try{
-        const response = await fetch(URL+'/api/account/mobile',{
+        const response = await fetch(URL+`/api/account/forgetid`,{
             method:'PUT',
-            headers:{
-                'Content-Type': 'application/json',
-                'x-access-token': authToken 
-            },body:JSON.stringify({
-                mobile, token
-            })
-        })
+            headers: {
+                'Content-Type': 'application/json', 
+                'x-access-token': mobileToken },
+            body: JSON.stringify({id, password}) })
         const data = await response.json()
         return data
+
     }catch(e){
-        return null
+        console.warn(e)
+        return {success:false}
     }
 }
 
-const changeEmail = async (payload, authToken)=>{
-    const { email } = payload
-    try{
-        const response = await fetch(URL+'/api/account/email',{
-            method:'PUT',
-            headers:{
-                'Content-Type': 'application/json',
-                'x-access-token': authToken 
-            },body:JSON.stringify({
-                email
-            })
-        })
-        const data = await response.json()
-        return data
-    }catch(e){
-        return null
-    }
-}
-const changePassword = ()=>{
-
-}
 
 const checkToken = async (token)=>{
     if(!token || token ==='')
@@ -233,7 +219,7 @@ const checkToken = async (token)=>{
             method:'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'x-access-token': token }
+                'x-access-token': token },
             })
         const data = await response.json()
         return data

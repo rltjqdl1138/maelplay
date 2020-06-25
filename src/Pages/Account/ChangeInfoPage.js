@@ -193,7 +193,7 @@ class PasswordItem extends Component{
         const result = await Account.changeInfo('password', token, {oldPassword, password:value})
         if(!result.success)
             this.props.handleNotice(result.isnotCorrect ? '기존 비밀번호가 올바르지 않습니다.' : '잠시 후 다시 시도해주세요')
-        console.warn(result)
+        
         return result.success
     }
     handleChange = (field, text) => this.setState({ [field]:text })

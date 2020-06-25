@@ -165,9 +165,16 @@ export default class LoginContainer extends Component {
 
                     <View style={styles.findContainer}>
                         <TouchableWithoutFeedback style={styles.findIDContainer}
-                            onPress={()=>{ navigator.push('FindIDPage',{}) }} >
+                            onPress={()=>{ navigator.push('Findidpage',{}) }} >
                             <Text style={styles.plainText}>
-                                아이디 찾기 | 비밀번호 찾기
+                                아이디 찾기
+                            </Text>
+                        </TouchableWithoutFeedback>
+                        <View style={{width:10}} />
+                        <TouchableWithoutFeedback style={styles.findIDContainer}
+                            onPress={()=>{ navigator.push('Findpasswordpage',{}) }} >
+                            <Text style={styles.plainText}>
+                                비밀번호 찾기
                             </Text>
                         </TouchableWithoutFeedback>
                     </View>
@@ -288,11 +295,13 @@ const styles=StyleSheet.create({
         height:150,
         paddingTop:20,
         paddingLeft:25,
-        paddingRight:25
+        paddingRight:25,
+        flexDirection:'row',
+        justifyContent:'center',
     },
     findIDContainer:{
         width:60,
-        height:'100%',
+        height:'100%'
     },
     blankContainer:{
         width:20,
