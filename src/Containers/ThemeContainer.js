@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import { StyleSheet, View, Text, ScrollView, Animated, TouchableOpacity, Dimensions} from 'react-native'
 import { Music } from '../NetworkHandler'
+import AlbumArt from '../Components/AlbumArt'
 const {width} = Dimensions.get('window')
 
 
@@ -49,6 +50,7 @@ export default class ThemeContainer extends Component{
                                 list={item.list}
                                 title={item.title}
                                 subTitle={item.subTitle}
+                                designType={item.designType}
                                 navigator={this.props.navigator}
                             />) : null ) : (<Text style={styles.loadingText}>로딩중...</Text>)
                         }
@@ -95,12 +97,14 @@ const styles = StyleSheet.create({
 
 class LowGroup extends Component{
     render(){
-        const { title, subTitle, navigator } = this.props
+        const { title, subTitle, navigator, designType } = this.props
         const albums = this.props.list.map( item => (
                     <Album key={item.ID}
                         albumID={item.ID}
+                        uri={item.uri}
                         title={item.title}
                         artist={item.artist}
+                        designType={designType}
                         navigator={navigator}
                     />)
                 )
@@ -190,19 +194,23 @@ const containerStyle = StyleSheet.create({
 ///>
 class Album extends Component{
     render(){
-        const {title, albumID, artist, navigator} = this.props
+        const {title, albumID, artist, navigator, uri, designType} = this.props
         return(
             <TouchableOpacity style={itemStyle.container}
-                onPress={()=>navigator.push('Albumcontainer',{albumID})}>
-                <View style={[itemStyle.imageContainer, {borderColor:'black', borderWidth:1}]} />
+                onPress={()=>navigator.push('Albumcontainer',{albumID, designType})}>
+                <View style={itemStyle.imageContainer} >
+                    <AlbumArt url={uri} designType={designType}/>
+                </View>
                 <View style={itemStyle.titleContainer}>
-                    <Text style={itemStyle.title} numberOfLines={1}>
+                    <Text style={[itemStyle.title, {textAlign: designType > 2 ? 'center' : 'left'}]}
+                        numberOfLines={1}>
                         {title}
                     </Text>
                 </View>
 
                 <View style={itemStyle.subtitleContainer}>
-                    <Text style={itemStyle.subtitle} numberOfLines={1}>
+                    <Text style={[itemStyle.subtitle, {textAlign: designType > 2 ? 'center' : 'left'}]}
+                            numberOfLines={1}>
                         {artist}
                     </Text>
                 </View>

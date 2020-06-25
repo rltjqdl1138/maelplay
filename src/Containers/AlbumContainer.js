@@ -2,6 +2,7 @@ import React, {Component} from 'react'
 import { View, TouchableOpacity, StyleSheet, Text, Image, ScrollView, Dimensions } from 'react-native'
 import {Music} from '../NetworkHandler'
 import {AlbumItem, MyplaylistItem} from '../Components/MusicInfoItem'
+import AlbumArt from '../Components/AlbumArt'
 //import networkHandler from '../networkHandler'
 //import CacheManager from '../CacheManager'
 //import {AudioActions, MyPlaylistActions} from '../store/actionCreator'
@@ -18,7 +19,7 @@ export default class AlbumContainer extends Component {
         }
     }
     componentDidMount(){
-        const {albumID} = this.props.config;
+        const {albumID, designType} = this.props.config;
         if(!this.props.handler.Music || !this.props.handler.Myplaylist)
             return navigator.pop()
         if(albumID === 0){
@@ -35,7 +36,7 @@ export default class AlbumContainer extends Component {
                     this.setState(state=>({
                         ...state,
                         isLoaded: true,
-                        albumInfo: data1.data[0],
+                        albumInfo: {...data1.data[0], designType},
                         musicPlaylist: data2.data }))
                     }
             })()
@@ -60,7 +61,6 @@ export default class AlbumContainer extends Component {
         await this.props.handler.Myplaylist.remove(index)
     }
     
-    
     handleClick = (index)=>{
         (async()=>{
             const {musicPlaylist, albumInfo} = this.state
@@ -78,15 +78,8 @@ export default class AlbumContainer extends Component {
         return (
             <View style={styles.albumContainer}>
                 <View style={styles.albumArtContainer}>
-                    <Text>{albumInfo.uri+'.jpg'}</Text>
-                    {/*
-                    <Image style={styles.circle}
-                        source={require('../image/circle.jpg')}
-                    />
-                    <Image style={styles.albumArt}
-                        source={require('../image/owl2.jpg')}
-                    />
-                    */}
+                    <AlbumArt url={albumInfo.uri}
+                        designType={albumInfo.designType}/>
                 </View>
                 <View style={styles.titleContainer}>
                         
@@ -186,8 +179,7 @@ const styles = StyleSheet.create({
         width:width*0.38,
         height:width*0.38,
         alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor:'green'
+        justifyContent: 'center'
     },
     circle:{
         position:'absolute',
