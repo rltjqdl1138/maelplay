@@ -3,6 +3,7 @@ import {StyleSheet, View, Text, TouchableOpacity} from 'react-native'
 import * as SecureStore from 'expo-secure-store';
 import {Route, Navigator} from './Navigator'
 import MainPage from './Pages/MainPage'
+import InformationPage from './Pages/InformationPage'
 import LoginPage from './Pages/LoginPage'
 import {SignupPage, UserInfoPage, AccountInfoPage, GreetingPage, ChangeInfoPage, FindIDPage, FindPasswordPage, ResetPasswordPage} from './Pages/Account' 
 
@@ -65,6 +66,7 @@ export default class RootContainer extends Component{
                 <Route name="Findidpage" component={FindIDPage} />
                 <Route name="Findpasswordpage" component={FindPasswordPage} />
                 <Route name="Resetpasswordpage" component={ResetPasswordPage} />
+                <Route name="Informationpage" component={InformationPage} />
             </Navigator>
         )
     }

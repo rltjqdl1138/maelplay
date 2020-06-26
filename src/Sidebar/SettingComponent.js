@@ -16,9 +16,9 @@ exports.LoginSetting = class LoginSetting extends Component{
         {title:'플랜선택', handler:()=>this.props.handleWholePush('Planpage'), textStyle:{color:'#121111'}},
         {title:'개인정보', handler:()=>this.props.handleWholePush('Userinfopage')},
         {title:'계정정보', handler:()=>this.props.handleWholePush('Accountinfopage')},
-        {title:'공지사항', handler:()=>this.props.handleWholePush('Noticepage')},
+        {title:'공지사항', handler:()=>this.props.handleWholePush('Informationpage')},
         {title: this.props.auth.platform==='original'?'비밀번호 변경':null, handler:()=>this.props.handleWholePush('Changeinfopage',{key:'password',name:'비밀번호',value:''})},
-        {title:'이용안내 및 약관', handler:()=>this.props.handleWholePush('Planpage')},
+        {title:'이용안내 및 약관', handler:()=>this.props.handleWholePush('Informationpage', {key:'usage'})},
         {title:'로그아웃', handler:()=>this.setState(({isModalVisible:true}))}
     ]
     render(){
@@ -53,8 +53,8 @@ exports.LoginSetting = class LoginSetting extends Component{
 exports.LogoutSetting = class LoginSetting extends Component{
     
     list = [
-        {title:'플랜 안내', handler:()=>this.props.handleWholePush('Planpage')},
-        {title:'이용안내 및 약관', handler:()=>this.props.handleWholePush('Planpage')}
+        {title:'플랜 안내', handler:()=>this.props.handleWholePush('Informationpage',{key:'plan'})},
+        {title:'이용안내 및 약관', handler:()=>this.props.handleWholePush('Informationpage',{key:'usage'})}
     ]
     render(){
         const { handleMainPush, handleWholePush, settingHandler } = this.props

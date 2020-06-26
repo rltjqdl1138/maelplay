@@ -11,7 +11,7 @@ export default class ThemeContainer extends Component{
         this.state={list:[], isLoaded:false}
     }
     componentDidMount(){
-        setTimeout(this.LoadThemelist,1000)
+        this.LoadThemelist()
     }
     LoadThemelist = async()=>{
         const result = await Music.getMainThemeList()

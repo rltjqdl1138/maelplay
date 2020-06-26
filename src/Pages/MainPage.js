@@ -10,16 +10,6 @@ import ThemeContainer from '../Containers/ThemeContainer'
 import AlbumContainer from '../Containers/AlbumContainer'
 import PlayingPage from './PlayingPage'
 import { Music } from '../NetworkHandler'
-/*
-import HeaderContainer from '../containers/HeaderContainer'
-import SearchContainer from '../containers/SearchContainer'
-import MainContainer from '../containers/MainContainer'
-import AlbumContainer from '../containers/AlbumContainer';
-import deviceCheck from '../deviceCheck'
-import PlayingPage from './PlayingPage'
-import MyPlaylistPage from './MyPlaylistPage'
-import SidebarPage from './SidebarPage'
-*/
 import {Route, Navigator} from '../Navigator'
 
 const SEQUENTE = 0
@@ -75,7 +65,7 @@ class MainPage extends Component {
         try{
             isPlaying ? await soundObject.pauseAsync() : null
             await soundObject.unloadAsync()
-            const result = await Music.getMusicFromCache(playlist[index].uri)
+            const result = await Music.getMusicFromCache(playlist[index].uri, this.props.auth)
             result.status === 'fail' ? console.warn('Download Fail') : console.warn(result.status)
             await soundObject.loadAsync({uri:result.uri})
             await soundObject.playAsync()
@@ -228,8 +218,8 @@ class MainPage extends Component {
                         handlePop={handleMainPop} />
                     
                 </View>
-                {this.state.searchNavigator.status ? (<SearchComponent navigator={this.state.searchNavigator} headerPos={headerPos}/>) : null}
                 {musicHandler.info.playingAlbumID < 0 ? null :(<PlayingPage headerPos={headerPos} musicHandler={musicHandler} myplaylistHandler={myplaylistHandler}/>)}
+                {this.state.searchNavigator.status ? (<SearchComponent navigator={this.state.searchNavigator} headerPos={headerPos}/>) : null}
                 
                 <Sidebar
                     auth={this.props.auth}
