@@ -26,6 +26,7 @@ exports.FindIDPage = class FindIDPage extends Component {
             countryCodeList:[],
             mobileToken:''
         }
+
     }
     componentDidMount(){
         this.getCountryCode()
@@ -156,7 +157,7 @@ exports.FindIDPage = class FindIDPage extends Component {
             <View style={styles.container}>
                 <SimpleHeader 
                     title="아이디 찾기"
-                    handler={()=>{navigator.pop('Findidage')}}
+                    handler={()=>{navigator.pop('Findidpage')}}
                     handleComplete={{title:'다음', handler:()=>handleComplete()}}
                     notice={notice} />
 
@@ -316,7 +317,7 @@ exports.FindPasswordPage = class FindPasswordPage extends Component {
                 ...state,
                 isLoaded:true,
                 countryCodeList:result.list
-            })) : this.props.navigator.pop('Findidpage')
+            })) : this.props.navigator.pop('Findpasswordpage')
     }
     getPickerItem = (_code, name, isIOS) =>{
         if(!_code || !name) return null
@@ -422,7 +423,7 @@ exports.FindPasswordPage = class FindPasswordPage extends Component {
             <View style={styles.container}>
                 <SimpleHeader 
                     title="비밀번호 찾기"
-                    handler={()=>{navigator.pop('Findidage')}}
+                    handler={()=>{navigator.pop('Findpasswordpage')}}
                     handleComplete={{title:'다음', handler:()=>handleComplete()}}
                     notice={notice} />
 

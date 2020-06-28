@@ -52,10 +52,11 @@ export default class AlbumContainer extends Component {
         }))
     
     handleAddPlaylist = async ()=>{
+        const {musicPlaylist, albumInfo} = this.state
         const { Myplaylist } = this.props.handler
-        const result = await Myplaylist.append(this.state.musicPlaylist)
+        const list = musicPlaylist.map(item=>( {...item, albumInfo} ))
+        const result = await Myplaylist.append(list)
         result.success ? alert(result.data + '곡이 추가되었습니다.'): null
-        
     }
     handleDeletePlaylist = async (index)=>{
         await this.props.handler.Myplaylist.remove(index)
@@ -74,12 +75,14 @@ export default class AlbumContainer extends Component {
         })()
     }
     getAlbumArt = () =>{
-        const {albumInfo} = this.state
+        const {albumInfo, musicPlaylist} = this.state
+        const playingIndex = this.props.handler.Music.info.playingIndex >= 0 ? this.props.handler.Music.info.playingIndex : 0
+        const info = albumInfo.ID === 0 && musicPlaylist.length > 0 ? musicPlaylist[playingIndex].albumInfo : albumInfo
         return (
             <View style={styles.albumContainer}>
                 <View style={styles.albumArtContainer}>
-                    <AlbumArt url={albumInfo.uri}
-                        designType={albumInfo.designType}/>
+                    <AlbumArt url={info.uri}
+                        designType={info.designType}/>
                 </View>
                 <View style={styles.titleContainer}>
                         
@@ -105,13 +108,13 @@ export default class AlbumContainer extends Component {
     render(){
         const {isLoaded, musicPlaylist, albumInfo} = this.state
         const info = this.props.handler && this.props.handler.Music ? this.props.handler.Music.info : {}
-        const {playingAlbumID} = this.props.handler
+        const {playingAlbumID} = this.props.handler.Music.info
         const isDisabled = info.playingAlbumID === albumInfo.ID
         const list = musicPlaylist.map((item,index)=>albumInfo.ID === 0 ?
             (<MyplaylistItem key={index}
                 handleClick={this.handleClick}
                 handleDeletePlaylist={this.handleDeletePlaylist}
-                isPlaying={index===info.playingIndex && albumInfo.ID === playingAlbumID}
+                isPlaying={index===info.playingIndex && isDisabled}
                 index={index}
                 uri={item.uri}
                 title={item.title}
@@ -119,7 +122,7 @@ export default class AlbumContainer extends Component {
             ):(
             <AlbumItem key={index}
                 handleClick={this.handleClick}
-                isPlaying={index===info.playingIndex}
+                isPlaying={index===info.playingIndex && isDisabled}
                 index={index}
                 uri={item.uri}
                 title={item.title}

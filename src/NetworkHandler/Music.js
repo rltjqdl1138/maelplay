@@ -15,18 +15,21 @@ exports.setMyPlaylist = async(list)=>{
     const data = JSON.stringify(list)
     await FileSystem.writeAsStringAsync(fileUri, 'MYPLAYLIST'+data)
 }
-exports.getMusicFromCache = async(uri, auth) =>{
+exports.getMusicFromCache = async(uri, auth, _option) =>{
+    const option = _option ? _option : {}
     const fileUri = !auth.isLogin ? FileSystem.cacheDirectory +'Sample__' +uri +'.mp3' : FileSystem.cacheDirectory + uri +'.mp3'
-    console.warn(fileUri)
     //const CacheTable = await _getCacheTable()
     const file = await FileSystem.getInfoAsync(fileUri)
-    if(file && file.exists)
+    if(file && file.exists && !option.force)
         return {uri:file.uri,status:'old'}
-    
-    const remoteUri = URL + '/music/' + uri
-    const downloadFile = await FileSystem.downloadAsync(remoteUri, fileUri, {headers:{'x-access-token':auth.token}})
-    if(downloadFile.status === 200 || downloadFile.status === 201){
-        return {uri:downloadFile.uri, status:'new'}
+    try{
+        const remoteUri = URL + '/music/' + uri
+        const downloadFile = await FileSystem.downloadAsync(remoteUri, fileUri, {headers:{'x-access-token':auth.token}})
+        if(downloadFile.status === 200 || downloadFile.status === 201){
+            return {uri:downloadFile.uri, status:'new'}
+        }
+    }catch(e){
+        console.warn(e)
     }
     return {status:'fail', uri:remoteUri}
 }

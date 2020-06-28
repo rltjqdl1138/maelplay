@@ -2,10 +2,7 @@ import React, {Component} from 'react'
 import {View, StyleSheet, Animated, PanResponder, Dimensions, Text, TouchableOpacity, Image, ScrollView} from 'react-native'
 import MiniPlaybar from '../Components/Miniplaybar'
 import {AlbumItem, MyplaylistItem} from '../Components/MusicInfoItem'
-//import PlayingContainer from '../containers/PlayingContainer'
-//import MiniPlaybar from '../components/MiniPlaybar'
-//import { AudioActions  } from '../store/actionCreator'
-//import deviceCheck from '../deviceCheck'
+import AlbumArt from '../Components/AlbumArt'
 
 const minibarSize = 120
 
@@ -176,8 +173,6 @@ const WholeStyle=StyleSheet.create({
         left:0,
         width:'100%',
         height:'200%',
-        borderColor:'black',
-        borderWidth:1
         //display:'none'
     },
     mini:{
@@ -206,23 +201,12 @@ const minibarPos = height - 180
 
 class MainPlayerContainer extends Component {
     translatedY = new Animated.Value(minibarPos)
-    handleAddPlaylist(items){
-        /*
-        const {myPlaylist} = this.props
-        const itemlist = items.map((item,index)=>{
-            const albumTitle = this.state.albumInfo ? this.state.albumInfo.title : undefined
-            const checkOverlap = (element) => element.ID === item.ID
-            const isOverlap = myPlaylist.findIndex(checkOverlap)
-            if(isOverlap < 0)
-                return {...item, index:myPlaylist.length+index+1, albumTitle}
-            return {...item, ID:Date.now() + ':' +item.ID, index:myPlaylist.length+index+1,
-                albumTitle}
-        })
-        const result = [...myPlaylist, ...itemlist]
-        MyPlaylistActions.update({list:result})
-        if(this.props.playingAlbumID===0)
-            AudioActions.update({albumID:0, list:result, index:this.props.index})
-        */
+    handleAddPlaylist = async ()=>{
+        const {musicPlaylist, albumInfo} = this.state
+        const { Myplaylist } = this.props.handler
+        const list = musicPlaylist.map(item=>( {...item, albumInfo} ))
+        const result = await Myplaylist.append(list)
+        result.success ? alert(result.data + '곡이 추가되었습니다.'): null
     }
     handleOpenMinibar = ()=>{
         Animated.timing(this.translatedY, {
@@ -245,36 +229,35 @@ class MainPlayerContainer extends Component {
         })()
     }
     getAlbumArt = () =>{
-        const {info} = this.props.musicHandler
+        const {playingAlbumID, playingAlbum, playlist} = this.props.musicHandler.info
+        const playingIndex = this.props.musicHandler.info.playingIndex >= 0 ? this.props.musicHandler.info.playingIndex : 0
+        const info = playingAlbumID === 0 ? playlist[playingIndex].albumInfo : playingAlbum
         return (
             <View style={styles.albumContainer}>
                 <View style={styles.albumArtContainer}>
-                    <Text>{info.playingAlbum.uri+'.jpg'}</Text>
-                    {/*
-                    <Image style={styles.circle}
-                        source={require('../image/circle.jpg')}
-                    />
-                    <Image style={styles.albumArt}
-                        source={require('../image/owl2.jpg')}
-                    />
-                    */}
+                    <AlbumArt url={info.uri}
+                        designType={info.designType}/>
                 </View>
                 <View style={styles.titleContainer}>
+                        
                     <Text style={styles.title}>
-                        {info.playingAlbum.title}
+                        {playlist[playingIndex].title}
                     </Text>
                     <Text style={styles.artist}>
-                        {info.playingAlbum.artist}
+                        {info.artist}
                     </Text>
                 </View>
-
-                <TouchableOpacity style={{width:18, paddingTop:8, paddingRight:0}}
-                        onPress={()=>{this.handleAddPlaylist(info.playlist); alert('리스트에 추가되었습니다') }} >
-                        <Image style={{width:13,height:13,resizeMode:'cover'}}
-                            source={require('../../assets/icons/add.png')} />
-                </TouchableOpacity>
-                
+                {playingAlbumID ? this.getAddButton() : null}
             </View>)
+    }
+    getAddButton = ()=>{
+        return (
+            <TouchableOpacity style={{width:18, paddingTop:8, paddingRight:0}}
+                onPress={()=>this.handleAddPlaylist()} >
+                <Image style={{width:13,height:13,resizeMode:'cover'}}
+                    source={require('../../assets/icons/add.png')} />
+            </TouchableOpacity>
+        )
     }
     render(){
         const {info, next, pause, setOption} = this.props.musicHandler
@@ -379,15 +362,6 @@ const styles = StyleSheet.create({
         height:width*0.3,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor:'green'
-    },
-    circle:{
-        position:'absolute',
-        width:'100%',
-        height:'100%',
-        resizeMode:'contain',
-        borderColor:'black',
-        borderWidth:1,
     },
     albumArt:{
         position:'absolute',

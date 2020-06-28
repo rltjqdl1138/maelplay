@@ -57,6 +57,7 @@ class MainPage extends Component {
             this.handleChange('musicInfo', {soundObject:null, isLoaded:false, isPlaying:false, playlist:[], playOption:0, playingIndex:-1, playingAlbumID:-1})
         }
     }
+    
 
     LoadSound = async(_index)=>{
         const {soundObject, isPlaying, playlist} = this.state.musicInfo
@@ -65,9 +66,14 @@ class MainPage extends Component {
         try{
             isPlaying ? await soundObject.pauseAsync() : null
             await soundObject.unloadAsync()
-            const result = await Music.getMusicFromCache(playlist[index].uri, this.props.auth)
+            const result = await Music.getMusicFromCache(playlist[index].uri, this.props.auth, {force:false})
             result.status === 'fail' ? console.warn('Download Fail') : console.warn(result.status)
-            await soundObject.loadAsync({uri:result.uri})
+            try{
+                await soundObject.loadAsync({uri:result.uri})
+            }catch(e){
+                const result2 = await Music.getMusicFromCache(playlist[index].uri, this.props.auth, {force:true})
+                await soundObject.loadAsync({uri:result2.uri})
+            }
             await soundObject.playAsync()
             this.handleChange('musicInfo',{...this.state.musicInfo, isPlaying:true, playingIndex:index})
         }catch(e){

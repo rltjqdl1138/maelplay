@@ -1,6 +1,6 @@
 import React, {Component} from 'react'
 import {View, StyleSheet, Text, TouchableOpacity, Image, Dimensions, ProgressViewIOS, PanResponder} from 'react-native'
-//import PlayingBar from './PlayingBar'
+import AlbumArt from '../Components/AlbumArt'
 const {width} = Dimensions.get('window')
 
 export default class MiniPlayingbar extends Component{
@@ -24,9 +24,15 @@ export default class MiniPlayingbar extends Component{
     render(){
         const {PlayButton} = this
         const {minibarSize, musicHandler} = this.props
-        const playInfo = musicHandler.info ? musicHandler.info.playlist[musicHandler.info.playingIndex] : {title:''}
-        const albumInfo = musicHandler.info ? musicHandler.info.playingAlbum : {title:''}
 
+        const {playingAlbumID, playingAlbum, playlist} = this.props.musicHandler.info
+        const playingIndex = this.props.musicHandler.info.playingIndex >= 0 ? this.props.musicHandler.info.playingIndex : 0
+        const info = playingAlbumID === 0 ? playlist[playingIndex].albumInfo : playingAlbum
+        
+        //const playingIndex = musicHandler.info.playingIndex >= 0 ? musicHandler.info.playingIndex : 0
+        //const playInfo = musicHandler.info ? musicHandler.info.playlist[playingIndex] : {title:''}
+        //const albumInfo = musicHandler.info ? musicHandler.info.playingAlbum : {ID:0, title:''}
+        //const album = musicHandler.info.playingAlbumID && playInfo && playInfo[playingIndex] ? albumInfo : playInfo[playingIndex].albumInfo
         return(
             <View style={styles.container}>
                 <View style={styles.playingbarContainer}>
@@ -34,16 +40,14 @@ export default class MiniPlayingbar extends Component{
                 </View>
                 <View style={styles.mainContainer}>
                     <View style={styles.leftPadding}/>
-                    <View style={[styles.albumContainer,{height:minibarSize-40, width:minibarSize-40, backgroundColor:'green'}]}>
-                        {/*<Image style={styles.circle} 
-                            source={require('../image/circle2.jpg')}  />
-                        <Image style={styles.albumImage}
-                            source={require('../image/owl2.jpg')}  />*/}
+                    <View style={[styles.albumContainer,{height:minibarSize-40, width:minibarSize-40 }]}>
+                        <AlbumArt url={info.uri}
+                            designType={info.designType}/>
                     </View>
 
                     <View style={styles.titleContainer}>
-                        <Text style={styles.title}>{playInfo?playInfo.title:''}</Text>
-                        <Text style={styles.albumTitle}>{albumInfo ? albumInfo.title:''}</Text>
+                        <Text style={styles.title}>{playlist[playingIndex].title}</Text>
+                        <Text style={styles.albumTitle}>{info.title}</Text>
                     </View>
 
                     <View style={styles.buttonContainer}>
@@ -63,7 +67,7 @@ export default class MiniPlayingbar extends Component{
                             </TouchableOpacity>
 
                             <TouchableOpacity style={styles.buttonItem}
-                                disabled={!albumInfo.ID}
+                                disabled={true}
                                 onPress={()=>this.props.myplaylistHandler.append(playInfo)}>
                                     <Image style={styles.addItemImage}
                                         source={require('../../assets/icons/add.png')} />
@@ -78,7 +82,7 @@ export default class MiniPlayingbar extends Component{
         )
     }
 }
-
+const BACKGROUND = '#F2EFEF'
 const styles= StyleSheet.create({
     container:{
         width:'100%',
@@ -86,16 +90,14 @@ const styles= StyleSheet.create({
         backgroundColor:'#fff'
     },
     playingbarContainer:{
-        height:10,
+        height:15,
         width:'100%',
     },
     mainContainer:{
         flex:1,
         width:'100%',
         flexDirection:'row',
-        backgroundColor:'#ddd',
-
-        backgroundColor:'#F2EFEF',
+        backgroundColor:BACKGROUND,
     },
 
     leftPadding:{
@@ -221,8 +223,12 @@ class PlayingBar extends Component {
         const {isMoving, ms, progress, duration}= this.state
         const _progress = ms < duration ? ms/duration : 1
         return (
-            <View style={{width:'100%',height:10,backgroundColor:'#fafafa'}}>
-                <ProgressViewIOS progress={ isMoving || !ms || !this.props.musicHandler.info.isPlaying ? progress : _progress }/>
+            <View style={{width:'100%', height:'100%', backgroundColor:BACKGROUND, alignItems:'center'}}>
+                <ProgressViewIOS
+                    style={{backgroundColor:BACKGROUND, width:'100%'}}
+                    progressTintColor="black"
+                    trackTintColor={BACKGROUND}
+                    progress={ isMoving || !ms || !this.props.musicHandler.info.isPlaying ? progress : _progress }/>
             </View>
         )
     }
@@ -250,8 +256,9 @@ class PlayingBar extends Component {
 
 const BarStyle= StyleSheet.create({
     container:{
+        height:'100%',
         width:'100%',
-        height:10
+        borderColor:'red', borderWidth:1
     },
     subContainer:{
       width:'100%',
@@ -261,14 +268,6 @@ const BarStyle= StyleSheet.create({
       paddingRight:10,
       position:'absolute'
     },
-    downSideContainer:{
-        position:'relative',
-        height:20,
-        width:'100%',
-        backgroundColor:'#F2EFEF',
-        alignItems:'flex-end',
-        flexDirection:'row'
-    }
 
 })
 
